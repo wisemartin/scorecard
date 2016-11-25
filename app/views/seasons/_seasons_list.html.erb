@@ -1,0 +1,16 @@
+<%= link_to 'New Season', new_season_path<<"?id=#{@league.id}", {:class => 'btn btn-primary', :type => 'button'} %>
+
+<table class='table table-bordered'>
+  <tr>
+    <th>Name</th>
+    <th>Year</th>
+    <th>Actions</th>
+  </tr>
+  <% @seasons.each_with_index  do |season,i| %>
+      <tr class='<%= i.odd? ? 'warning' : 'success' %>'><td><%= link_to season.name, season_path(season.id) %></td>
+      <td><%= season.start_date.year %></td>
+    <td></td>
+    <td><%= link_to 'Edit', edit_season_path(season) %></td>
+          </tr>
+  <% end %>
+</table>

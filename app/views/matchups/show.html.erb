@@ -1,0 +1,53 @@
+<%= link_to('Correct', edit_matchup_path, {:class => "btn btn-primary", :type => 'button'}) %>
+<p id="notice"><%= notice %></p>
+<% season = @matchup.season %>
+
+<h4>Score Card</h4>
+Week: <%= @matchup.week.date %>
+<br/>
+Course: <%= @matchup.week.course.name %>
+<br/>
+<span style="font-weight: bold;color:red">
+  <span style="padding-right:40px;">
+    <%= @matchup.visiting_team.team_id %>. <%= @matchup.visiting_team.name %>
+    total points: <span style="font-size: 2em"><%= @matchup.visiting_team_points %></span>
+    </span>
+  <%= @matchup.home_team.team_id %>. <%= @matchup.home_team.name %>
+  total points: <span style="font-size: 2em"><%= @matchup.home_team_points %>
+  </span>
+  </span>
+
+<% @holes = @matchup.score_cards.first.rounds.first.holes_for_round %>
+<% @tee_boxes = @matchup.score_cards.first.rounds.first.holes_for_round.first.course.tee_boxes %>
+<table class='table table-bordered table-condensed' width="800px">
+  <%= render partial: 'teebox_header', :locals=>{holes: @holes, tee_boxes: @tee_boxes} %>
+
+  <% @matchup.score_cards.where(:team_id => @matchup.visiting_team_id).each do |scorecard| %>
+      <tbody>
+
+      <!-- Need to split up matchups between A and B when matchups have more than one group -->
+      <% scorecard.rounds.order([:listed, :handicap]).each_with_index do |round, i| %>
+          <% shading=false %>
+          <% home_round = @matchup.score_cards.where(:team_id => @matchup.home_team_id).first.rounds.order([:listed, :handicap])[i] %>
+          <%= render partial: 'round_show', :locals => {shading: shading, opposing_round: home_round, round: round, holes: @holes} %>
+          <% shading=true %>
+          <%= render partial: 'round_show', :locals => {shading: shading, opposing_round: round, round: home_round, holes: @holes} %>
+          <%= render partial: 'hole_number_line', :locals=>{holes: @holes} if i==0 -%>
+      <% end %>
+
+      </tbody>
+
+  <% end %>
+
+  <%#= render 'medal_summary' %>
+  </tbody>
+  <%= render partial: 'round_footer', :locals=>{holes: @holes} %></table>
+<p/>
+<%= render 'match_points' if @match_points %>
+<% if params[:edit_button] %>
+    <%= button_to 'Edit', edit_game_path %>
+<% end %>
+
+
+
+

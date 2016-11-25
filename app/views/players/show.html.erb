@@ -1,0 +1,61 @@
+
+  <p id="notice"><%= notice %></p>
+  <%= link_to 'All Players', players_path ,{:type=>'button',:class=>'btn btn-success'} %>
+  <%= link_to 'Edit', edit_player_path(@player),{:type=>'button',:class=>'btn btn-primary'} if session[:user_id].to_i == 1 %>
+
+  <h1><%= @player.full_name %></h1>
+  email: <%= @player.email %>
+  <br/>
+  Handicap: <%= @player.weighted_handicap.round(1) %>
+  <br/>
+  Pearson Handicap:  <%= @player.pearson_handicap.round(1) %>
+  <br/>
+  USGA (9-hole) Handicap:  <%= @player.usga_handicap.round(1) %>
+    <br/>
+
+  <h3>Scores Used for Pearson Calculation</h3>
+  <table class='table table-bordered table-condensed table-striped'>
+    <thead>
+    <tr>
+      <td>Course</td>
+      <td>Week</td>
+      <td>Score</td>
+
+    </tr>
+    </thead>
+    <tbody>
+    <% @pearson_scores.each do |score| %>
+        <tr <%= 'class=error' if @gms.include?(score.game_id) %>>
+          <td><%= score.game.course ? score.game.course.name : 0.days.ago.year-1 %></td>
+          <td><%= score.game.week %></td>
+          <td><%= score.score %><%= @gms.include?(score.game_id) ? '  (unopposed)' : nil %></td>
+
+        </tr>
+    <% end %>
+    </tbody>
+  </table>
+
+
+  <h3>Scores Used for USGA Calculation</h3>
+    <table class='table table-bordered table-condensed table-striped'>
+      <thead>
+      <tr>
+        <td>Course</td>
+        <td>Week</td>
+        <td>Score</td>
+
+      </tr>
+      </thead>
+      <tbody>
+      <% @usga_scores.each_with_index do |score,i| %>
+          <tr class="<%= i < @usga_score_count ? 'success' : '' %>" >
+            <td><%= score.game.course ? score.game.course.name : 0.days.ago.year-1 %></td>
+            <td><%= score.game.week %></td>
+            <td><%= score.score %></td>
+
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+
+

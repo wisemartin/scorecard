@@ -1,0 +1,51 @@
+<fieldset style="margin-bottom:10px;border:solid 1px gray;padding:10px;-webkit-border-radius:4px">
+  <h4>Match Points</h4>
+
+  <% @match_points.each do |match_points| %>
+      <% player1 = match_points[:home_scores].first[:score].player %>
+      <% player2 = match_points[:visiting_scores].first[:score].player %>
+      <% p1rh = [0, match_points[:home_scores].first[:score].round.course_handicap-match_points[:visiting_scores].first[:score].round.course_handicap].max %>
+      <% p2rh = [0, match_points[:visiting_scores].first[:score].round.course_handicap-match_points[:home_scores].first[:score].round.course_handicap].max %>
+      <span style="margin-top:10px;font-weight:bold">
+      <br/>
+    </span>
+      <table class='table table-condensed'>
+        <thead>
+        <tr>
+          <th>
+            <%= player1.full_name %> <%= p1rh > 0 ? "(+#{p1rh})" : nil -%>
+            vs.
+            <%= player2.full_name %> <%= p2rh > 0 ? "(+#{p2rh})" : nil -%>
+          </th>
+        </tr>
+        </thead>
+        <% match_points[:home_scores].first[:score].round.holes_for_round.sort_by{|hole| hole.handicap_index}.each_with_index do |hole, i| %>
+            <tr>
+              <!--match_points[:home_scores].first.keys
+              [:hole, :score, :net]-->
+              <% home_score = match_points[:home_scores].select{|hs| hs[:hole]== hole}.first %>
+              <% visiting_score = match_points[:visiting_scores].select{|hs| hs[:hole]== hole}.first %>
+
+              <td>Hole: <%= hole.number %></td>
+              <td>Par: <%= hole.par %> </td>
+              <td>Hole Rank: <%= hole.handicap_index %> </td>
+              <td style="<%= (home_score[:net].to_i<=>visiting_score[:net].to_i) == -1 ? 'background-color:#d0e9c6;' : nil %>">
+                              <%= player1.first_name %>: <%= home_score[:net] %><%= p1rh.to_i > i ? "*" : nil -%>
+                            </td>
+                            <td style="<%= (home_score[:net].to_i<=>visiting_score[:net].to_i)== 1 ? 'background-color:#d0e9c6;' : nil %>"><%= player2.first_name %>
+                              : <%= visiting_score[:net] %><%= p2rh.to_i > i ? "*" : nil -%></td>
+
+            </tr>
+        <% end %>
+      </table>
+    <span style="font-weight: bold;color: blue">
+    <%= player1.full_name %>
+      match points: <%= match_points[:home_pts] %>
+      <br/>
+      <%= player2.full_name %>
+      match points: <%= match_points[:visiting_pts] %>
+    </span>
+
+      <p style="margin-bottom:20px;"/>
+  <% end %>
+</fieldset>

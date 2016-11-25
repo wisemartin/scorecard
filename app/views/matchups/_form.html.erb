@@ -1,0 +1,49 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Score Card</h1>
+Week: <%= @matchup.week.date %>
+<br/>
+Course: <%= @matchup.week.course.name %>
+<hr/>
+<span style="font-weight: bold;color:red">
+  <div style="float:left;width:300px;padding-right:40px;"><%= @matchup.visiting_team.team_id %>
+    . <%= @matchup.visiting_team.name %>
+  </div>
+  <div style="float:left;width:50px;padding-right:40px;">vs.</div>
+  <div style="float:left;width:300px;padding-right:40px;">
+    <span style="float:right;"><%= @matchup.home_team.team_id %>. <%= @matchup.home_team.name %></span>
+  </div>
+  </span>
+<% holes = @matchup.score_cards.first.rounds.first.holes_for_round %>
+<% tee_boxes = @matchup.score_cards.first.rounds.first.holes_for_round.first.course.tee_boxes %>
+<table class='table table-bordered table-condensed' width="800px">
+  <%= render partial: 'teebox_header', :locals => {holes: holes, tee_boxes: tee_boxes} %>
+
+  <tbody style="font-size: 1.2em;">
+  <% @matchup.score_cards.where(:team_id => @matchup.visiting_team_id).each do |scorecard| %>
+      <!-- Need to split up matchups between A and B when matchups have more than one group -->
+
+          <% scorecard.rounds.order([:listed, :handicap]).each_with_index do |round, i| %>
+              <% shading=false %>
+              <% home_round = @matchup.score_cards.where(:team_id => @matchup.home_team_id).first.rounds.order([:listed, :handicap])[i] %>
+              <%= render partial: 'round_edit', :locals => {shading: shading, opposing_round: home_round, round: round, holes: holes} %>
+              <% shading=true %>
+              <%= render partial: 'round_edit', :locals => {shading: shading, opposing_round: round, round: home_round, holes: holes} %>
+              <%= render partial: 'hole_number_line', :locals => {holes: holes} if i==0 -%>
+          <% end %>
+
+  <% end %>
+
+  <%#= render 'medal_summary' %>
+  </tbody>
+  <%= render partial: 'round_footer', :locals => {holes: holes} %></table>
+
+</table>
+<p/>
+<%= form_for @matchup, :id => 'matchup' do |f| %>
+    <div style="height:30px;">
+      <%= f.submit 'Save Changes', :style => 'float:left;' %>
+      <%= link_to('Cancel', matchups_path<<"/#{@matchup.id}", {:class => "btn btn-warning", :type => 'button', :style => 'float:left;margin-left:5px;'}) if @matchup.rounds.collect { |round| round.gross_score.to_i }.min > 0 -%>
+      <%= link_to('Cancel', schedules_path<<"/#{@matchup.schedule.id}?week_id=#{@matchup.week.id}", {:class => "btn btn-warning", :type => 'button', :style => 'float:left;margin-left:5px;'}) if @matchup.rounds.collect { |round| round.gross_score.to_i }.min == 0 -%>
+    </div>
+<% end %>

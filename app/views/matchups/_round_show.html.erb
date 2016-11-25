@@ -1,0 +1,15 @@
+<% relative_handicap = [round.course_handicap - opposing_round.course_handicap, 0].max %>
+<tr class='<%= shading ? 'success' : '' %>' style='height:1px;font-size: 1.2em;'>
+  <td style='width:17.5%;'><%= round.team.team_id %>: <%= round.player.full_name %>
+    <span style="float:right;">(<%= round.course_handicap %>)</span>
+  </td>
+  <% holes.each do |hole| %>
+      <% score = round.scores.select { |sc| sc.hole == hole }.first %>
+      <!-- background-image: url(/birdie.png);background-repeat: no-repeat -->
+      <td style='width:7%;<%= score.score == hole.par ? 'color:blue;' : '' %><%= score.score < hole.par ? 'color:green;font-weight:bold;' : '' %>'>
+        <%= score.score if score %>
+        <span style="float:right;font-size: 2em;color:red;"><%= relative_handicap > 0 && hole.stroke_applied?(relative_handicap) > 0 ? (hole.stroke_applied?(relative_handicap) == 1 ? "." : ":") : '   ' %></span>
+      </td>
+  <% end %>
+  <td style='width:7%;'><%= round.gross_score %>/<%= round.gross_score - round.course_handicap %></td>
+</tr>

@@ -1,0 +1,163 @@
+<%= link_to('Week', games_path, {:class => "btn btn-success", :type => 'button'}) %>
+<%= link_to('Standings', teams_path, {:class => "btn btn-success", :type => 'button'}) %>
+<%= link_to('Correct', edit_game_path, {:class => "btn btn-primary", :type => 'button'}) %>
+
+<p id="notice"><%= notice %></p>
+
+<h1>Score Card</h1>
+Game number:<%= @game.id %>
+<br/>
+Week number: <%= @game.week %>
+<br/>
+Course: <%= @game.course.name %>
+<hr/>
+<span style="font-weight: bold;color:red">
+  <span style="padding-right:40px;"><%= @game.home_team.team_name %>
+    total points: <span style="font-size: 2em"><%= @game.home_team_points %></span></span>  <%= @game.visiting_team.team_name %>
+  total points: <span style="font-size: 2em"><%= @game.visiting_team_points %></span>
+</span>
+
+<table class='table table-bordered table-condensed' width="800px">
+  <% player = @matches.first.first %>
+  <thead>
+        <tr>
+          <th style="width:17.5%">Hole</th>
+          <% @game.course.holes.each do |hole| %>
+              <th style='width:7%;'><%= hole.hole_number %></th>
+          <% end %>
+          <th style='width:19.5%'>Total Score</th>
+        </tr>
+        <% %w(blue white gold red).each do |tee_box| %>
+            <% style="background-color:#{tee_box};color:#{%w(white gold).include?(tee_box) ? 'black' : 'white'};" %>
+            <tr>
+              <th style='<%= style %>'>
+                <%= tee_box.titleize %></th>
+              <% @game.course.holes.each do |hole| %>
+                  <th style='<%= style %>'><%= hole.send(tee_box) %></th>
+              <% end %>
+              <th style='<%= style %>'><%= @game.course.holes.collect { |hole| hole.send(tee_box) }.sum %></th>
+            </tr>
+        <% end %>
+        </thead>
+
+  <tbody style='border:solid 3px black;'>
+  <tr style='height:1px;'>
+    <th style='width:17.5%;'>
+    </th>
+    <% @game.course.holes.each do |hole| %>
+        <th style='width:7%'></th>
+    <% end %>
+    <th style='width:19.5%'></th>
+  </tr>
+  <% @matches.each do |matchup| %>
+      <tr class="success" style="border-top:solid black 3px;font-size:1.2em">
+        <% matchup.each do |player| %>
+            <% player.for_week = @game.week %>
+
+            <td><%= player.full_name %> (<%= player.weighted_handicap.round(1) %>)</td>
+            <% @game.course.holes.each do |hole| %>
+                <% score = @scores.select { |sc| sc.player_id == player.id && sc.hole_id==hole.id }.first %>
+                <td style='background-repeat: no-repeat; color: <%= case score.score <=> hole.par
+                       when 1
+                         'black'
+                       when 0
+                         'blue'
+                       when -1
+                         "rgb(47, 218, 47);font-size:1.6em;font-weight:bolder;background-image:url(/birdie.png);"
+                     end
+                  %>'><%= score.score if score %></td>
+            <% end %>
+            <td><%= @scores.select { |sc| sc.player_id == player.id }.collect { |sc| sc.score }[0..8].sum %>
+              <span style='margin-left:20px;font-style:italic;color:red'>(<%= player.scores.select { |sc| sc.game_id == @game.id }.collect { |sc| sc.net_score(player.weighted_handicap.to_i) }[0..8].sum %>
+                )</span></td>
+            </tr>
+            <tr style='font-size:1.2em;'>
+        <% end %>
+        </tr>
+        <% if matchup == @matches.first %>
+            <tr style='background-color:black;height:3px;'>
+              <td></td>
+              <% @game.course.holes.each do |hole| %>
+                  <td></td>
+              <% end %>
+              <td></td>
+            </tr>
+        <% end %>
+
+  <% end %>
+  </tbody>
+  <tfoot>
+        <tr>
+          <% style="background-color:rgb(111, 106, 106);color:white;" %>
+          <th style='<%= style %>'>
+            Handicap
+          </th>
+          <% @game.course.holes.each do |hole| %>
+              <th style='<%= style %>'><%= hole.handicap_index %></th>
+          <% end %>
+          <th style='<%= style %>'></th>
+        </tr>
+        </tfoot>
+  </tfoot>
+
+</table>
+<p/>
+<fieldset style="margin-bottom:10px;border:solid 1px gray;padding:10px;-webkit-border-radius:4px">
+  <h4>Match Points</h4>
+
+  <% @match_points.each do |holes| %>
+      <% player1 = holes.first[:player_1_score].player %>
+      <% player2 = holes.first[:player_2_score].player %>
+      <% player1.for_week = @game.week %>
+      <% player2.for_week = @game.week %>
+      <% p1rh = [0, player1.weighted_handicap.to_i-player2.weighted_handicap.to_i].max %>
+      <% p2rh = [0, player2.weighted_handicap.to_i-player1.weighted_handicap.to_i].max.round %>
+      <span style="margin-top:10px;font-weight:bold">
+      <br/>
+    </span>
+      <table class='table table-condensed'>
+        <thead>
+        <tr>
+          <th>
+            <%= holes.first[:player_1_score].player.full_name %> <%= p1rh > 0 ? "(+#{p1rh})" : nil -%>
+            vs.
+            <%= holes.first[:player_2_score].player.full_name %> <%= p2rh > 0 ? "(+#{p2rh})" : nil -%>
+          </th>
+        </tr>
+        </thead>
+        <% holes.each_with_index do |point, i| %>
+            <tr>
+              <% hole = point[:hole] %>
+              <% p1s = point[:player_1_score] %>
+              <% p2s = point[:player_2_score] %>
+              <% p1s.use_handicap= p1rh %>
+              <% p2s.use_handicap= p2rh %>
+              <% points = point[:points] %>
+
+              <td>Hole: <%= hole.hole_number %></td>
+              <td> Par: <%= hole.par %> </td>
+              <td>Hole Rank: <%= hole.handicap_index %>     </td>
+              <td style="<%= (p1s.net_score<=>p2s.net_score)== -1 ? 'background-color:#d0e9c6;' : nil -%>"><%= p1s.player.first_name %>
+                : <%= p1s.net_score %><%= p1rh > i ? "*" : nil -%></td>
+              <td style="<%= (p1s.net_score<=>p2s.net_score)== 1 ? 'background-color:#d0e9c6;' : nil -%>"><%= p2s.player.first_name %>
+                : <%= p2s.net_score %><%= p2rh > i ? "*" : nil -%></td>
+
+            </tr>
+        <% end %>
+      </table>
+    <span style="font-weight: bold;color: blue">
+    <%= holes.first[:player_1_score].player.full_name %>
+      match points: <%= holes.collect { |sc| sc[:points][0] }.sum/2.to_f %>
+      <br/>
+      <%= holes.first[:player_2_score].player.full_name %>
+      match points: <%= holes.collect { |sc| sc[:points][1] }.sum/2.to_f %>
+    </span>
+
+      <p style="margin-bottom:20px;"/>
+  <% end %>
+</fieldset>
+<% if params[:edit_button] %>
+    <%= button_to 'Edit', edit_game_path %>
+<% end %>
+
+

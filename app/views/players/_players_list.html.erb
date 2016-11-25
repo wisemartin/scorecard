@@ -1,0 +1,25 @@
+<table class='table table-bordered table-condensed' style="width:<%= 200+(55*@weeks.size)%>px;">
+  <tr>
+    <th style="width:200px;">Name</th>
+    <% this_week = Week.new() %>
+    <% @weeks.each do |week| %>
+        <td><%= link_to week.date.strftime("%m.%d"), schedules_path<<"/#{week.schedule_id}?week_id=#{week.id}", {:class => (week.matchups.present? ? "btn #{this_week==week ? '' : 'btn-mini'} btn-primary #{this_week==week ? ' disabled' : ''}" : "btn #{this_week==week ? '' : 'btn-mini'}  btn-danger disabled"), :type => 'btn'} %></td>
+    <% end %>
+
+  </tr>
+  <% @players.sort{|a,b| a.player_league_handicaps.where(:season_id=>@season.id).first.handicap_index <=> b.player_league_handicaps.where(:season_id=>@season.id).first.handicap_index}.each_with_index do |player, i| %>
+      <% rounds = player.rounds.for_season(@season) %>
+      <tr class='<%= i.odd? ? 'warning' : 'success' %>'>
+        <td><%= player.full_name %>
+          <span style='float:right;'><%= player.player_league_handicaps.where(:season_id=>@season.id).first.handicap_index.round(1) %></span>
+        </td>
+        <%# scores = player.scores.all_by_week %>
+        <% @weeks.each do |week| %>
+            <% round = rounds.select { |rnd| rnd.score_card.week == week }.first %>
+            <%# score = scores.select { |score| score.game.week == week }.first %>
+            <td><%= link_to round.total_score, (matchups_path << "/" << round.score_card.matchup_id.to_s) if (round.present? && round.total_score.present?) -%></td>
+        <% end %>
+
+      </tr>
+  <% end %>
+</table>

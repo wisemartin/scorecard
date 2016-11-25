@@ -1,0 +1,87 @@
+<script>
+    $( "#season_start_date" ).datepicker( "option", "dateFormat", "yy-mm-dd" );
+</script>
+<%= form_for(@season) do |f| %>
+    <% if @season.errors.any? %>
+        <div id="error_explanation">
+          <h2><%= pluralize(@season.errors.count, "error") %> prohibited this season from being saved:</h2>
+
+          <ul>
+            <% @season.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+    <% end %>
+
+    <h2>Name</h2>
+    <%= f.text_field :name, :style => "width:400px;" %>
+    <h2>Schedule</h2>
+    Starting on:<br/><%= f.text_field :start_date, {:class => 'datepicker', "data-provide" => 'datepicker', :value=>@season.start_date.strftime("%m/%d/%Y")} %>
+    <br/>
+    Every:<br/>
+    <table>
+      <tr>
+
+        <% Date::ABBR_DAYNAMES.each_with_index do |wday, i| %>
+            <th><%= wday %>
+              <br/><%= check_box_tag wday, i, false %>
+            </th>
+        <% end %>
+      </tr>
+    </table>
+
+    <%= f.hidden_field(:league_id) %>
+    Ending:<br/>
+    <%= f.text_field :end_date, {:class => 'datepicker', "data-provide" => 'datepicker', :value=>@season.end_date.strftime("%m/%d/%Y")} %>
+    <br/>
+    <%#= f.text_field :number_weeks, :style=>"width:100px;"%>
+
+
+    <h2>Course</h2>
+    <%= collection_select(:week, :course_id, Course.all, :id, :name, :prompt => true) %><p/>
+    -button to new course
+
+    <h2>Handicapping</h2>
+    <%#= @season.handicapping_method.attributes.inspect %>
+    <p/>
+    <%= render :partial => 'handicapping_method' %>
+
+    <h2>Scoring</h2>
+
+    <%= f.nested_fields_for :scoring_methods do |sm| %>
+        <%= sm.remove_nested_fields_link %>
+        <%= sm.text_field :type, {:disabled => true, :style => "width:110px;"} %>
+        <%= sm.hidden_field :type %>
+        Points per matchup: <%= sm.text_field :points_per_match, :style => "width:40px;" %><br/></label>
+
+
+    <% end %>
+    <%# f.add_nested_fields_link(:scoring_methods)%>
+    <p/>
+    <h2>Rounds</h2><p/>
+    9 hole<p/>
+    - rotate 9s? if 9 hole and more than 9 holes on course.
+    18 hole<p/>
+
+
+    <h2>Teams</h2>
+    <%= f.label :roster_size %>
+    <%= f.text_field :roster_size, :style=>"width:60px;" %><br/>
+    <%= f.label :roster_size, 'Number playing each match' %>
+    <%= f.text_field :number_playing_each_match, :style=>"width:60px;" %><br/>
+    <%= f.check_box :limit_subs_to_roster %> Limit sublist to team roster.<br/>
+
+    <h2>Divisions</h2>
+    <div id="divisions">
+      <%= f.nested_fields_for :divisions do |sd| %>
+          <%= render :partial => 'divisions', :locals => {:sd => sd} %>
+      <% end %>
+    </div>
+    <%= f.add_nested_fields_link(:divisions, "Add Division" ,data:{ insert_into: 'divisions'}) %>
+
+
+    <div class="actions">
+      <%= f.submit %>
+    </div>
+<% end %>

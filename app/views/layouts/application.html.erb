@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HoleIN 1.0</title>
+  <%= stylesheet_link_tag "application", :media => "all" %>
+  <%= javascript_include_tag "application" %>
+  <%= csrf_meta_tags %>
+</head>
+<body style='background-color:#d0e9c6;background-image: url(/golf-course.jpg);background-position: bottom;'>
+<div id='main' style="margin:10px;padding:10px;background-color: white;-webkit-border-radius:7px;overflow-y: auto;min-width:1000px;">
+
+
+  <div style="font-family:tahoma, verdana, sans-serif;background-image: url(/e.png);background-repeat: no-repeat;background-position: right top;margin:10px;padding:10px;background-color: white;-webkit-border-radius:7px;">
+    <div style='float:right;margin-right:10px;color:honeydew;text-shadow:2px 2px black'>
+      <h3 style='text-align: right;'>HoleIN 1.0</h3>
+      <span style='text-align: right'>Handicapping Online</span>
+    </div>
+    <%= link_to 'Organizations', organizations_path, {:class => "btn btn-success #{controller.controller_name=='organizations' && controller.action_name!='show' ? 'disabled' : ''}", :type => 'button'} %>
+    <%= link_to 'Leagues', leagues_path, {:class => "btn btn-success #{(controller.controller_name == 'organizations' && controller.action_name=='show')|| (controller.controller_name=='leagues' && controller.action_name!='show') ? 'disabled' : ''}", :type => 'button'} %>
+    <%= link_to 'Seasons', seasons_path, {:class => "btn btn-success #{(controller.controller_name == 'leagues' && controller.action_name=='show') || controller.controller_name=='seasons' ? 'disabled' : ''}", :type => 'button'} %>
+
+    <%= yield %>
+    <span style="vertical-align: bottom;margin-top:50px;">Copyright 2014-2017 by Martin Wise.</span>
+  </div>
+</div>
+<script type='text/javascript'>
+
+    document.getElementById('main').style.height = window.innerHeight - 40 + "px";
+    window.onresize = function () {
+        document.getElementById('main').style.height = window.innerHeight - 40 + "px";
+    }
+</script>
+
+</body>
+</html>

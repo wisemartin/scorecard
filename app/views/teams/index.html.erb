@@ -1,0 +1,46 @@
+<%= link_to 'New Team', new_team_path, {:class => 'btn btn-danger', :type => 'button', :style => 'float:right;margin-right:75px;'} %>
+<% season = @divisions.first.season %>
+<h4>
+  <% if season.prior_season.present? %><%= link_to '<<', season_path(season.prior_season.id) %>
+  <% end %> <%= season.name %> Standings
+  <% if season.next_season.present? %><%= link_to '>>', season_path(season.next_season.id) %>
+  <% end %>
+</h4>
+<% @divisions.each do |division| %>
+    <h4><%= division.name %></h4>
+    <table class='table table-bordered' style="width:<%= 300+(55*@weeks.size)%>px;" >
+      <tr>
+        <th style="width:300px;">Team</th>
+        <% this_week = Week.new() %>
+        <% @weeks.each do |week| %>
+            <td><%= link_to week.date.strftime("%m.%d"), schedules_path<<"/#{week.schedule_id}?week_id=#{week.id}", {:class => (week.matchups.present? ? "btn #{this_week==week ? '' : 'btn-mini'} btn-primary #{this_week==week ? ' disabled' : ''}" : "btn #{this_week==week ? '' : 'btn-mini'}  btn-danger disabled"), :type => 'btn'} %></td>
+        <% end %>
+
+      </tr>
+      <% @teams.select { |team| team.division_id == division.id }.each_with_index do |team, i| %>
+          <% score_cards = team.score_cards %>
+          <tr class='<%= i.odd? ? 'warning' : 'success' %>'>
+            <td><div style="width:30px;float:left;"><%= team.team_id %>.</div> <%= team.name %>
+              <span style="float:right;"><%= team.team_total %></span>
+              <span style='float:right;margin-right:5px;'>
+              <% link_to("Edit", edit_team_path(team)) unless params[:download] %></span></td>
+            </td>
+            <% @weeks.each do |week| %>
+                <% score_card = score_cards.select{|sc| sc.week == week}.first %>
+            <td><%= link_to score_card.our_score, matchups_path<<"/#{score_card.matchup_id}" if score_card && score_card.our_score.present? -%></td>
+            <% end %>
+          </tr>
+      <% end %>
+
+    </table>
+<% end %>
+<table class='table table-bordered'>
+  <% @teams.select { |team| team.division_id.blank? }.each do |team| %>
+      <tr>
+        <td><%= team.name %></td>
+        <td colspan=3><%= link_to 'Show', team %> | <%= link_to 'Edit', edit_team_path(team) %></td>
+        <td><%= link_to 'Destroy', team, method: :delete, data: {confirm: 'Are you sure?'} %></td>
+      </tr>
+  <% end %>
+</table>
+<br/>

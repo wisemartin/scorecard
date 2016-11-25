@@ -1,0 +1,5 @@
+<table><tr>
+  <% HandicappingMethod.content_columns.except.each do |column| %>
+      <td><%= column.name.humanize %>:<br/> <%= @handicapping_method.send(column.name) %></td>
+  <% end %>
+</tr></table>

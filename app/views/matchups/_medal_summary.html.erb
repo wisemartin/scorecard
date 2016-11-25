@@ -1,0 +1,28 @@
+<% @matches.each do |matchup| %>
+      <tr class="success" style="border-top:solid black 3px;font-size:1.2em">
+        <% matchup.each do |player| %>
+            <% player.for_week = @matchup.week %>
+
+            <td><%= player.full_name %> (<%= player.weighted_handicap.round(1) %>)</td>
+            <% @matchup.course.tee_boxes.first.holes.each do |hole| %>
+                <%# score = @scores.select { |sc| sc.player_id == player.id && sc.hole_id==hole.id }.first %>
+                <td style='background-repeat: no-repeat; color: ><%#= score.score if score %></td>
+            <% end %>
+            <td><%= @scores.select { |sc| sc.player_id == player.id }.collect { |sc| sc.score }[0..8].sum %>
+              <span style='margin-left:20px;font-style:italic;color:red'>(<%= player.scores.select { |sc| sc.game_id == @matchup.id }.collect { |sc| sc.net_score(player.weighted_handicap.to_i) }[0..8].sum %>
+                )</span></td>
+            </tr>
+            <tr style='font-size:1.2em;'>
+        <% end %>
+        </tr>
+        <% if matchup == @matches.first %>
+            <tr style='background-color:black;height:3px;'>
+              <td></td>
+              <% @matchup.course.holes.each do |hole| %>
+                  <td></td>
+              <% end %>
+              <td></td>
+            </tr>
+        <% end %>
+
+  <% end %>

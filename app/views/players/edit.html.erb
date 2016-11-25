@@ -1,0 +1,7 @@
+<%= link_to 'Back', player_path(@player),{:class=>'btn btn-success',:type=>"button"} %>
+<%= link_to 'Players', players_path,{:class=>'btn btn-success',:type=>"button"} %>
+
+<h1>Editing <%= @player.full_name %></h1>
+
+<%= render 'form' %>
+

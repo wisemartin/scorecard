@@ -1,0 +1,18 @@
+@import 'bootstrap';
+
+input[type="submit"] {
+  @extend .btn;
+  @extend .btn-primary;
+};
+
+table {
+  @extend .table-hover;
+}
+
+.header-right {
+  text-align: right;
+}
+
+label {
+  @extend .control-label;
+}

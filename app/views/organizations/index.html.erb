@@ -1,0 +1,26 @@
+<%= link_to 'New Organization', new_organization_path, {:class => 'btn btn-primary', :type => 'button'} %>
+
+<table class='table table-bordered'>
+  <tr>
+    <% Organization.columns.reject { |col| ["created_at", "updated_at", "id"].include?(col.name) }.each do |col| %>
+        <th><%= col.human_name %></th>
+    <% end %>
+    <th>Actions</th>
+  </tr>
+
+  <% @organizations.each_with_index do |organization,i| %>
+      <tr class='<%= i.odd? ? 'warning' : 'success' %>'>
+        <td><%= link_to organization.name, organization_path(organization.id) %></td>
+        <td><%= organization.city %></td>
+        <td><%= organization.state.name%></td>
+
+
+        <td><%= link_to 'Show', organization  %></td>
+        <td><%= link_to 'Edit', edit_organization_path(organization) %></td>
+      </tr>
+  <% end %>
+</table>
+
+<br/>
+
+

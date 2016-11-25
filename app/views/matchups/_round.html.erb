@@ -1,0 +1,8 @@
+<th style='width:17.5%;'>
+  <%= select @round, :player_id, options_from_collection_for_select(@players, :id, :full_name, @round.player_id) %>
+</th>
+<% @round.holes_for_round.each do |hole| %>
+    <th style='width:7%'>
+      <input type="text" style="width:30px;" name="score[round_<%= @round.id %>][hole_<%= hole.id %>]" id="score_round_<%= @round.id %>_hole_<%= hole.id %>" value="<%= @round.scores.select{|sc| sc.hole_id == hole.id}.first.score %>" ></th>
+<% end %>
+<th style='width:19.5%'><%= @round.scores.sum{|sc| sc.score} %></th>

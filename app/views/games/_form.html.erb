@@ -1,0 +1,80 @@
+<%= form_for(@game) do |f| %>
+    <div class="actions">
+      <%= link_to 'Back', games_path, {:class => 'btn btn-success', :type => 'btn'} %>
+      <%= f.submit("Save Changes") %>
+    </div>
+
+    <h1>Score Card</h1>
+    Game number:<%= @game.id %> Week number: <%= @game.week %>
+    <br/>
+    Course: <%= @game.course.name %> <p/>
+    <h4><%= @game.home_team_display %> vs. <%= @game.visiting_team_display %>:  <span style="color:red"><%= (0.days.ago.to_date.to_time+4.hours+((@game.tee_time-1)*10).minutes).strftime("%k:%M") %></span> tee time</h4>
+    <hr/>
+    <% if @game.errors.any? %>
+        <div id="error_explanation">
+          <h2><%= pluralize(@game.errors.count, "error") %> prohibited this game from being saved:</h2>
+
+          <ul>
+            <% @game.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+    <% end %>
+    <table class='table table-bordered table-condensed table-striped' style='border:solid 2px black'>
+      <thead>
+      <tr>
+        <th style="width:17.5%">Hole</th>
+        <% @game.course.holes.each do |hole| %>
+            <th style='width:7%;'><%= hole.hole_number %></th>
+        <% end %>
+        <th style='width:19.5%'>Total Score</th>
+      </tr>
+      <% %w(blue white gold red).each do |tee_box| %>
+          <% style="background-color:#{tee_box};color:#{%w(white gold).include?(tee_box) ? 'black' : 'white'};" %>
+          <tr>
+            <th style='<%= style %>'>
+              <%= tee_box.titleize %></th>
+            <% @game.course.holes.each do |hole| %>
+                <th style='<%= style %>'><%= hole.send(tee_box) %></th>
+            <% end %>
+            <th style='<%= style %>'><%= @game.course.holes.collect { |hole| hole.send(tee_box) }.sum %></th>
+          </tr>
+      <% end %>
+      </thead>
+      <tbody style="border:solid 2px black" >
+      <% %w( home visiting).each do |hv| %>
+          <% @game.send("#{hv}_team_players").each do |player| %>
+              <!-- make a player_score_partial -->
+              <% @player_score = @game.player_scores(player) %>
+              <% @player_subs = @subs + @game.send("#{hv}_team").players %>
+              <%= render :partial => 'player_score' %>
+          <% end %>
+          <% if hv=='home' %>
+              <tr style='background-color:#d0e9c6'>
+                <td>Par</td>
+                <% @game.course.holes.each do |hole| %>
+                    <td><%= hole.par %></td>
+                <% end %>
+                <td>36</td>
+
+              </tr>
+          <% end %>
+
+      <% end %>
+      </tbody>
+      <tfoot>
+      <tr>
+        <% style="background-color:rgb(111, 106, 106);color:white;" %>
+        <th style='<%= style %>'>
+          Handicap
+        </th>
+        <% @game.course.holes.each do |hole| %>
+            <th style='<%= style %>'><%= hole.handicap_index %></th>
+        <% end %>
+        <th style='<%= style %>'></th>
+      </tr>
+      </tfoot>
+    </table>
+
+<% end %>

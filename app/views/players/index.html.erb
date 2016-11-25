@@ -1,0 +1,27 @@
+<%= link_to('New Golfer', new_player_path, {:class => 'btn btn-danger', :type => 'button', :style => 'float:right;margin-right:75px;'}) unless params[:download] %>
+
+<div style="height:65px;">
+  <h4><%= @season.name %> Players</h4>
+  </div>
+<div>
+  <% if @season.limit_subs_to_roster %>
+      <% @season.divisions.collect{|div| div.teams}.flatten.each do |team| %>
+          <h5>
+            <%= team.name %>
+          </h5>
+          <% @players = team.players %>
+          <%= render 'players_list' %>
+      <% end %>
+  <% else %>
+      <%= render 'players_list' %>
+  <% end %>
+
+  <br/>
+
+  <% unless @season.limit_subs_to_roster %>
+      <h4>Subs List</h4>
+      <% @players = @subs.select { |player| (player.rounds.for_season(@season)).present? } %>
+      <%= render 'players_list' %>
+  <% end %>
+
+</div>

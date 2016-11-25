@@ -1,0 +1,21 @@
+<h1>Listing scoring_methods</h1>
+
+<table>
+  <tr>
+    <th></th>
+    <th></th>
+    <th></th>
+  </tr>
+
+<% @scoring_methods.each do |scoring_method| %>
+  <tr>
+    <td><%= link_to 'Show', scoring_method %></td>
+    <td><%= link_to 'Edit', edit_scoring_method_path(scoring_method) %></td>
+    <td><%= link_to 'Destroy', scoring_method, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+  </tr>
+<% end %>
+</table>
+
+<br />
+
+<%= link_to 'New Scoring method', new_scoring_method_path %>

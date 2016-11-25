@@ -1,0 +1,24 @@
+<% player = @player_score[:player] %>
+<% if request.user_agent =~ /webos|mobile/i %>
+
+    <script>
+        $("input").blur(function () {
+            var inputs = $(this).closest('form').find(':input');
+            inputs.eq(inputs.index(this) + 1).focus();
+        });
+    </script>
+
+<% end %>
+<tr>
+  <td><%= select_tag("#{@player_score[:attribute]}[id]", options_from_collection_for_select(@player_subs.sort_by { |ply| ply.full_name }, :id, :full_name, player.id), :style => 'width:180px;') %>
+  </td>
+  <% @player_score[:scores].each do |score| %>
+
+      <td><%= number_field_tag("#{@player_score[:attribute]}[scores][hole_#{score.hole_id}]", score.score||score.hole.par, {:in => 1..10, :style => "width:30px;"}) %></td>
+
+  <% end %>
+  <td><span id="player_#{player.id}_score"><%= @player_score[:scores].collect { |sc| sc.score.to_i }.sum %></span>
+    (<%= player.weighted_handicap %>)
+  </td>
+
+</tr>

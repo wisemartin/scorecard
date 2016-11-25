@@ -1,0 +1,73 @@
+<table>
+  <tr>
+    <%= fields_for @season.handicapping_method do |hc| %>
+        <% %w(use of_the_last min_number percent max_handicap).each do |name| %>
+            <th>
+              <%= name.humanize %>
+            </th>
+        <% end %>
+        </tr>
+        <tr>
+          <td><%= hc.text_field :number_used, {:style => 'width:60px;'} %></td>
+          <td><%= hc.text_field :number_considered, {:style => 'width:60px;'} %></td>
+          <td><%= hc.text_field :minimum_considered, {:style => 'width:60px;'} %></td>
+          <td><%= hc.text_field :handicap_percent, {:style => 'width:60px;'} %></td>
+          <td><%= hc.text_field :max_handicap, {:style => 'width:60px;'} %></td>
+
+
+          <!-- primary handicap definition -->
+    <% end %>
+    </tr>
+    </table>
+<!-- how to establish handicap -->
+<!--exclude_extremes-->
+<!--use_ratings-->
+<!--use_stats_for_hole_handicap-->
+<!--allow_positive_handicap-->
+
+<!--ignore_unopposed_rounds-->
+<%= fields_for @season.handicapping_method do |hc| %>
+    <% %w(exclude_extremes use_ratings allow_positive_handicap ignore_unopposed_rounds).each do |name| %>
+        <p><%= hc.check_box name %>   <%= name.humanize %>?</p>
+    <% end %>
+
+    <!-- primary handicap definition -->
+<% end %>
+<%= fields_for @season.handicapping_method do |hc| %>
+    <p><%= hc.check_box :limit_to_max_hole_score, :onclick => "$('span#max_score').toggle();" %> Limit Max Hole Score?
+      <span id="max_score" style="margin-left:10px;<%= @season.handicapping_method.limit_to_max_hole_score? ? '' : 'display:none;' %>">
+      <%= hc.select :max_hole_score_type, options_from_collection_for_select(MaxHoleScoreType.all, :id, :description, @season.handicapping_method.max_hole_score_type) %>
+        <%= hc.text_field :max_hole_score_amount, {:style => 'width:60px;'} %> strokes
+
+    </span>
+    </p>
+
+    <!-- primary handicap definition -->
+<% end %>
+
+
+<h5>Handicap for establishing:</h5>
+<%= fields_for @season.handicapping_method do |hc| %>
+    <p><%= hc.check_box :callaway, :onclick => "$('span#callaway_pct').toggle();" %>Callaway while
+      establishing?<span id="callaway_pct" style="margin-left:10px;<%= @season.handicapping_method.callaway? ? '' : 'display:none;' %>"><%= hc.text_field :callaway_percent, {:style => 'width:60px;'} %>
+      percent of initial handicap</span>
+    </p>
+    <p><%= hc.check_box :rollover_season, :onclick => "$('span#rollover_number_weeks').toggle();" %>Rollover Last Years
+      Handicap?
+      <span id="rollover_number_weeks" style="margin-left:10px;<%= @season.handicapping_method.rollover_season? ? '' : 'display:none;' %>"><%= hc.text_field :rollover_number_weeks, {:style => 'width:60px;'} %>
+        weeks</span>
+    </p>
+
+    <!-- primary handicap definition -->
+<% end %>
+
+<!--limit_to_max_hole_score-->
+<!--max_hole_score_type-->
+<!--max_hole_score_amount-->
+
+
+
+
+
+
+

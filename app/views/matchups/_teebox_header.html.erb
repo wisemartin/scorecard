@@ -1,0 +1,18 @@
+<thead style="border-bottom: black 3px solid;">
+<% tee_boxes.sort_by { |tb| tb.holes.first.length }.reverse.each do |tee_box| %>
+    <% style="background-color:#{tee_box.color};color:#{%w(White Gold white gold).include?(tee_box.color) ? 'black' : 'white'};" %>
+    <tr>
+      <th style='<%= style %>'>
+        <%= tee_box.name.titleize %></th>
+      <% holes.each do |hole| %>
+          <th style='<%= style %>'><%= tee_box.holes.select { |hol| hole.number == hol.number }.first.length %></th>
+      <% end %>
+      <th style='<%= style %>'><%= tee_box.holes.select { |hol| holes.collect { |hol| hol.number }.include?(hol.number) }.sum { |hole| hole.length } %></th>
+    </tr>
+
+<% end %>
+<tr>
+  <td colspan="11" style="background-color: white" height="0px;"></td>
+</tr>
+
+</thead>

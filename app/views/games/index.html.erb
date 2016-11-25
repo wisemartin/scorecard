@@ -1,0 +1,121 @@
+<%= link_to('Standings', teams_path, {:class => "btn btn-success", :type => 'button'}) %>
+<%= link_to 'Players/Handicaps', players_path, {:class => 'btn btn-success', :type => 'button'} %>
+<% this_week = params[:week]||@games.first.week %>
+<h1>Week <%= params[:week]||@games.first.week %>  <%= @games.first.course.name %></h1>
+<% (1..(@max_week+2)).each do |week| %>
+    <%= link_to (Date.parse('2014-05-07')+(week.to_i.weeks)).strftime("%m-%d"), games_url<<"?week=#{week}", {:class =>(@weeks_with_games.include?(week) ? 'btn btn-mini btn-primary' : 'btn btn-mini btn-danger'), :type => 'btn'} %>
+<% end %>
+
+<table class='table table-bordered table-condensed'>
+  <tr>
+    <th>Matchup</th>
+    <th>Tee time</th>
+    <th></th>
+  </tr>
+
+  <% @games.each do |game| %>
+      <tr class='<%= game.tee_time.even? ? 'warning' : 'success' %>'>
+
+        <td><%= game.home_team_players.collect { |ply| ply.full_name }.join(" - ") %> vs. <%= game.visiting_team_players.collect { |ply| ply.full_name }.join(" - ") %></td>
+        <td><%= (0.days.ago.to_date.to_time+4.hours+((game.tee_time-1)*10).minutes).strftime("%k:%M") %></td>
+        <% if game.scores.first.present? %>
+            <td colspan=2><%= "#{game.home_team_points} - #{game.visiting_team_points}" %>
+              | <%= link_to 'Show', game %> </td>
+        <% else %>
+            <td colspan=2><%= link_to 'Enter', edit_game_path(game) %></td>
+        <% end %>
+      </tr>
+  <% end %>
+</table>
+
+<h4>Skins</h4>
+<table class='table table-bordered table-condensed'>
+  <thead>
+  <tr>
+    <th>
+      Player
+    </th>
+    <th>
+      Hole
+    </th>
+    <th>
+      Score (to par)
+    </th>
+    <th>
+      Payout
+    </th>
+  </tr>
+
+  </thead>
+  <tbody>
+  <% @skins.each do |skin| %>
+      <tr>
+        <td><%= skin.player.full_name %></td>
+        <td><%= skin.hole.hole_number %></td>
+        <td><%= skin.score %>  (<%= case skin.score - skin.hole.par
+                                      when -3
+                                        (skin.score == 1 ? 'Ace!' : 'Albatross')
+                                      when -2
+                                        (skin.score == 1 ? 'Ace!' : 'Eagle')
+                                      when -1
+                                        'Birdie'
+                                    end
+        %>)
+        </td>
+
+        <td>$<%= (@skin_count.to_f/@skins.collect { |sc| sc.score }.size.to_f).round(2) %></td>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<h4>Low Net Scores</h4>
+<table class='table table-bordered table-condensed'>
+  <thead>
+  <tr>
+    <th>
+      Player
+    </th>
+    <th>
+      Net Score
+    </th>
+  </tr>
+
+  </thead>
+  <tbody>
+  <% @low_net_score.each do |skin| %>
+      <tr>
+        <td><%= skin.player.full_name %></td>
+        <td><%= skin.score %></td>
+
+      </tr>
+  <% end %>
+  </tbody>
+</table>
+
+<h4>Average Scores for the week</h4>
+<table class='table table-bordered table-condensed'>
+  <thead>
+  <tr>
+    <% @games.first.course.holes.each do |hole| %>		
+    <th>
+      <%= hole.hole_number %> 
+    </th>
+    <% end %>
+  </tr>
+
+  </thead>
+  <tbody>
+    <tr>
+    <% @average_scores.sort_by{|score| score.hole_id}.each do |score| %>		
+    <td>
+      <%= score.score %> 
+    </td>
+    <% end %>
+    </tr>
+  </tbody>
+</table>
+
+
+<br/>
+

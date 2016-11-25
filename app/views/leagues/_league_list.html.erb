@@ -1,0 +1,15 @@
+<%= link_to 'New League', new_league_path<<"?organization_id=#{session[:organization_id]}", {:class => 'btn btn-primary', :type => 'button'} %>
+<div style="margin-top:20px;">
+  <h1>Leagues</h1>
+  <table class='table table-bordered'>
+    <tr>
+      <th>Name</th>
+    </tr>
+    <% @leagues.each_with_index do |league,i| %>
+        <tr class='<%= i.odd? ? 'warning' : 'success' %>'>
+          <td><%= link_to league.name, league_path(league.id) %></td>
+        </tr>
+
+    <% end %>
+  </table>
+</div>

@@ -1,0 +1,11 @@
+<%= link_to 'Organizations', organizations_path, {:class => 'btn btn-success', :type => 'button'} %>
+<%= link_to 'Leagues', leagues_path, {:class => 'btn btn-success', :type => 'button'} %>
+<%= link_to 'Seasons', seasons_path, {:class => 'btn btn-success disabled', :type => 'button'} %>
+
+<p id="notice"><%= notice %></p>
+
+
+
+
+<%= link_to 'Edit', edit_season_path(@season) %> |
+<%= link_to 'Back', seasons_path %>

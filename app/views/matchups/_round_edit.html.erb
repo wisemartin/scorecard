@@ -1,0 +1,29 @@
+<% relative_handicap = [round.course_handicap - opposing_round.course_handicap, 0].max %>
+<tr class='<%= shading ? 'success' : '' %>' style='height:1px;' id='round_<%= round.id %>'>
+  <td style='width:25%;'>
+    <%= form_for :round, :remote => true, :method => :post, :url => rounds_path, :html=>{:style => "margin: 0;", :id=>"round_#{round.id}"} do |r|  %>
+        <div style="float:left;width:30px;"><%= round.team.team_id %></div>
+        <%= select_tag :player_id, options_from_collection_for_select(@players, :id, :full_name, round.player_id),{:onchange=>"$(round_#{round.id}).submit();"} %>
+        <div style="float:right;width:20px;"><%= relative_handicap > 0 ? relative_handicap : nil -%></div>
+        <%= hidden_field_tag :id, round.id %>
+    <% end %>
+  </td>
+  <% round.scores.sort_by { |r| r.hole.number }.each do |score| %>
+
+      <!-- background-image: url(/birdie.png);background-repeat: no-repeat -->
+      <% hole = score.hole %>
+      <td style='width:7%;'>
+        <div id="score_<%= score.id %>">
+          <%= form_tag :scores, :remote => true, :method => :post, :url => scores_path, :id => "score_#{score.id}", :style => "margin: 0;" do %>
+              <%= hidden_field_tag :id, score.id %>
+              <%= number_field_tag "score", score.score, :style => 'width:40px;', :in => [1, 20], :onchange => "$(score_#{score.id}).submit();" %>
+              <span style="float:right;font-size: 2em;color:red;">
+              <%= relative_handicap > 0 && hole.stroke_applied?(relative_handicap) > 0 ? (hole.stroke_applied?(relative_handicap) == 1 ? "." : ":") : '   ' %>
+            </span>
+          <% end %></div>
+      </td>
+
+
+  <% end %>
+  <td style='width:7%;'><%= round.gross_score %>(<%= round.gross_score.to_i-round.course_handicap.to_i %>)</td>
+</tr>

@@ -1,0 +1,110 @@
+<%= link_to 'Edit Week', edit_week_path(@week.id), {:style => 'float:right;margin-right:100px;', :class => 'btn btn-danger', :type => 'button'} %>
+<div style="height:65px;">
+  <% this_week = @week %>
+  <h4><%= @schedule.season.name %> Schedule - <%= @week.course.name %></h4>
+  <h5><%= @week.date.strftime("%A, %b %d, %Y") %>
+
+    <% if @week.matchups.first.present? %>
+
+        - <%= @week.matchups.first.score_cards.first.rounds.first.type.to_s.gsub("Round", '').underscore.humanize.titleize %>
+    <% end %>
+  </h5>
+</div>
+<% @schedule.weeks.order(:date).each do |week| %>
+    <%= link_to week.date.strftime("%m-%d"), schedules_path<<"/#{week.schedule_id}?week_id=#{week.id}", {:class => (week.matchups.present? ? "btn #{this_week==week ? '' : 'btn-mini'} btn-primary #{this_week==week ? ' disabled' : ''}" : "btn #{this_week==week ? '' : 'btn-mini'}  btn-danger disabled"), :type => 'btn'} %>
+<% end %>
+
+<table class='table table-bordered table-condensed'>
+
+  <tr>
+    <th colspan="3">Matchup</th>
+    <th>Tee time</th>
+    <th></th>
+  </tr>
+
+  <% @week.matchups.each_with_index do |matchup, i| %>
+      <tr class='<%= i.odd? ? 'warning' : 'success' %>'>
+
+        <td style="padding-left:20px;"><%= matchup.visiting_team.name %>
+          <span style="float:right;margin-right: 10px;"><%= matchup.visiting_team.team_id %></span></td>
+        <td style="text-align: center;"> vs.</td>
+        <td style="text-align: right;padding-right:20px;"><%= matchup.home_team.name %>
+          <span style="float:left;margin-left: 10px;"><%= matchup.home_team.team_id %></span></td>
+        <td style="text-align: center;">tee time</td>
+        <td colspan=2>
+          <% score = "Edit" %>
+          <% score= "#{matchup.score_cards.where(:team_id => matchup.visiting_team_id).first.our_score} -  #{matchup.score_cards.where(:team_id => matchup.home_team_id).first.our_score}" if matchup.rounds.collect { |round| round.total_score.to_i }.min > 0 %>
+          <%= link_to score, matchups_path << "/#{matchup.id}" %>
+        </td>
+      </tr>
+  <% end %>
+</table>
+
+
+<br/>
+<% if @gross_skins.present? %>
+    <h4>Gross Skins</h4>
+    <table class='table table-bordered table-condensed'>
+      <thead>
+      <tr>
+        <th>Player</th>
+        <th>Hole</th>
+        <th>Score (to par)</th>
+      </tr>
+
+      </thead>
+      <tbody>
+      <% @gross_skins.each do |skin| %>
+          <tr>
+            <td><%= skin.first %></td>
+            <td><%= skin[1] %></td>
+            <td><%= skin[2] %> (<%= skin[3] %>)
+            </td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+<% end %>
+
+<% if @net_skins.present? %>
+    <h4>Net Skins</h4>
+    <table class='table table-bordered table-condensed'>
+      <thead>
+      <tr>
+        <th>Player</th>
+        <th>Hole</th>
+        <th>Score (to par)</th>
+      </tr>
+
+      </thead>
+      <tbody>
+      <% @net_skins.each do |skin| %>
+          <tr>
+            <td><%= skin.first %></td>
+            <td><%= skin[1] %></td>
+            <td><%= skin[2] %> (<%= skin[3] %>)
+            </td>
+          </tr>
+      <% end %>
+      </tbody>
+    </table>
+<% end %>
+
+<h4>Low Net</h4>
+<table class='table table-bordered table-condensed'>
+  <thead>
+  <tr>
+    <th>Player</th><th>Gross Score</th><th>Net Score</th>
+  </tr>
+
+  </thead>
+  <tbody>
+  <% @net_scores.each do |score| %>
+      <tr>
+        <% score.each do |val| %>
+        <td><%= val %></td>
+        <% end %>
+      </tr>
+  <% end %>
+  </tbody>
+</table>
