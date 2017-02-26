@@ -1,13 +1,4 @@
 <%= form_for(@team) do |f| %>
-    <script>
-        if (obj = document.getElementById("edit_team_<%= params[:id] %>")) {
-            obj.className = 'form-horizontal';
-        }
-        else {
-            document.getElementById('new_team').className = 'form-horizontal';
-        }
-
-    </script>
     <% if @team.errors.any? %>
         <div id="error_explanation">
           <h2><%= pluralize(@team.errors.count, "error") %> prohibited this team from being saved:</h2>
@@ -19,11 +10,16 @@
           </ul>
         </div>
     <% end %>
+    <%= f.label :name %>
     <%= f.text_field :name %>
-
-    <%= f.nested_fields_for :players do |p| %>
-            <%= p.select :id, @subs, :include_blank=>true %>
-    <% end %>
+    <%= f.label :players %>
+    <fieldset style="border:1px solid black;padding:10px; ">
+      <%= f.nested_fields_for :players do |p| %>
+          <%= p.remove_nested_fields_link %>
+          <%= p.select :id, @subs, :include_blank => true %>
+      <% end %>
+    </fieldset>
+    <%= f.label :division %>
 
     <%= f.select :division_id, @divisions %>
 

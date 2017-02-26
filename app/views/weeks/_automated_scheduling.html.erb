@@ -1,0 +1,32 @@
+<h4>Automated Scheduling</h4>
+<fieldset style="border: solid 1px darkblue;padding:5px;margin:10px;">
+  <%= radio_button_tag 'schedule_week', 'round_robin', nil, :onclick => "$('div#manual_matchups').hide();$('div#round_robin_all_divisions').show();$('div#championship_option').hide();" %>
+  Add Round Robin Schedule?
+  <br/>
+
+  <div id="round_robin_all_divisions" style="display:none;">
+    <% if @week.season.divisions.count > 1 %>
+        <%= check_box_tag 'round_robin_all_teams', nil, nil, :style => 'margin:10px;' %> Round robin across
+        divisions? <br/>
+    <% end %>
+    <%= check_box_tag 'round_robin_overwrite', nil, nil, :style => 'margin:10px;' %> Overwrite future
+    conflicting weeks? <br/>
+    <%= radio_button_tag 'round_robin_schedule', 'extend', true, :style => 'margin:10px;' %> Extend the
+    schedule if necessary? <br/>
+    <%= radio_button_tag 'round_robin_schedule', 'truncate', nil, :style => 'margin:10px;' %> Drop round
+    robin at the end of this schedule? <br/>
+  </div>
+  <%= radio_button_tag 'schedule_week', 'position_night', nil, :onclick =>"$('div#manual_matchups').hide();$('div#round_robin_all_divisions').hide();$('div#championship_option').show();" %>
+  Add a position round? <br/>
+  <% if @week.season.divisions.count > 1 %>
+      <div id="championship_option" style="display:none;">
+        <%= check_box_tag 'championship_round', nil, nil, :style => 'margin:10px;' %> Position Round across
+        divisions? <br/>
+      </div>
+
+      <%= radio_button_tag 'schedule_week', 'cross_division_matchups', nil, :onclick => (@week.season.divisions.count > 1 ? "$('div#manual_matchups').hide();$('div#round_robin_all_divisions').hide();$('div#championship_option').hide();" : '') %>
+      Add a randomly assigned cross-division matchup? <br/>
+  <% end %>
+  <%= radio_button_tag 'schedule_week', 'random_divisional_matchups', nil, :onclick => "$('div#manual_matchups').hide();$('div#round_robin_all_divisions').hide();$('div#championship_option').hide();" %>
+  Add randomly assigned<%= @week.season.divisions.count > 1 ? ' inter-divisional' : '' %> matchups? <br/>
+</fieldset>

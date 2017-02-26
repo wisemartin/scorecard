@@ -1,0 +1,18 @@
+<style>
+    .btn.dropdown-toggle.form-control.selectpicker.btn-default {
+        background-image: none;
+        background-color: white;
+    }
+</style>
+<%= javascript_include_tag "bootstrap-select" if @show_the_js_link -%>
+<%= label :season, :tee_box_id, 'Tee Box' %>
+<% @tee_boxes ||= @season.course.tee_boxes  if @season && @season.course %>
+<% @tee_boxes ||= [TeeBox.new()]%>
+<% tee_box_selector = collection_select(:season, :tee_box_id, @tee_boxes, :id, :color,{:include_blank=>true} ,{:class=>'selectpicker show-tick'}) %>
+<% @season.course.tee_boxes.each do |tb|
+     tee_box_selector.gsub!("value=\"#{tb.id}\"","data-content=\"<span class='label label-default' style='background-color:#{tb.color.downcase=='white' ? 'gray' : tb.color}'>#{tb.name}</span>\" value=\"#{tb.id}\"" )
+  end if @season && @season.course
+%>
+<%= render inline: tee_box_selector %>
+
+

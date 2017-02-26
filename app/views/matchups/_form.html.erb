@@ -1,3 +1,4 @@
+<%= link_to('New Golfer', new_player_path, {:class => 'btn btn-danger', :type => 'button', :style => 'float:right;margin-right:75px;'}) %>
 <p id="notice"><%= notice %></p>
 
 <h1>Score Card</h1>
@@ -29,13 +30,13 @@ Course: <%= @matchup.week.course.name %>
               <%= render partial: 'round_edit', :locals => {shading: shading, opposing_round: home_round, round: round, holes: holes} %>
               <% shading=true %>
               <%= render partial: 'round_edit', :locals => {shading: shading, opposing_round: round, round: home_round, holes: holes} %>
-              <%= render partial: 'hole_number_line', :locals => {holes: holes} if i==0 -%>
+              <%= render partial: 'hole_par_line', :locals => {holes: holes} if i==0 -%>
           <% end %>
 
   <% end %>
 
   <%#= render 'medal_summary' %>
-  </tbody>
+  <!--</tbody>-->
   <%= render partial: 'round_footer', :locals => {holes: holes} %></table>
 
 </table>

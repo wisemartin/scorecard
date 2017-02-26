@@ -8,8 +8,12 @@ class Season < ActiveRecord::Base
   has_one :handicapping_method, :dependent => :destroy
   has_many :scoring_methods, :dependent => :destroy
   has_and_belongs_to_many :players
+  has_many :players_seasons
+  has_many :player_league_handicaps
+  belongs_to :tee_box
 
-  attr_accessible :name, :league_id, :start_date, :end_date, :eighteen_holes, :handicapping_method, :scoring_methods, :scoring_methods_attributes, :divisions, :divisions_attributes,:course_id, :roster_size, :limit_subs_to_roster, :number_playing_each_match, :copy_players
+  attr_accessible :name, :league_id, :start_date, :end_date, :eighteen_holes, :handicapping_method, :scoring_methods, :scoring_methods_attributes, :divisions, :divisions_attributes,:course_id, :roster_size, :limit_subs_to_roster, :number_playing_each_match, :copy_players,
+                  :gross_skins, :net_skins, :skins_paid_by_season, :rotate_nines, :handicapping_method_attributes, :wday, :scramble_tee_boxes, :tee_time_start, :tee_time_interval, :tee_box_id
   after_create :make_schedule, :add_players
   after_update :update_schedule
   attr_accessor :copy_players
@@ -43,7 +47,12 @@ class Season < ActiveRecord::Base
 
   def add_players
     #add_players from prior seasons
-    players= players|league.seasons(:order=>'id').last.players if copy_players==true
+    players|prior_season.players.each do |ps|
+      self.players_seasons.find_or_create_by_player_id(ps.id)
+      plh = self.player_league_handicaps.find_or_create_by_player_id(ps.id)
+      pplh = prior_season.player_league_handicaps.where(player_id: ps.id).first
+      plh.update_attribute(:handicap_index, pplh.handicap_index) if plh && pplh
+    end if self.copy_players
 
   end
 
@@ -51,14 +60,6 @@ class Season < ActiveRecord::Base
   def add_player(player)
     self.players = self.players << player
     self.save
-  end
-
-  def player_handicap(player)
-     num = Player
-  end
-
-  def tee_box
-     course.tee_boxes.first
   end
 
 end

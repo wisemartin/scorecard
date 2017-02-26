@@ -11,7 +11,7 @@
       <% rounds = player.rounds.for_season(@season) %>
       <tr class='<%= i.odd? ? 'warning' : 'success' %>'>
         <td><%= player.full_name %>
-          <span style='float:right;'><%= player.player_league_handicaps.where(:season_id=>@season.id).first.handicap_index.round(1) %></span>
+          <span style='float:right;'><%= player.player_league_handicaps.where(:season_id=>@season.id).first.handicap_index.to_f.round(1) %></span>
         </td>
         <%# scores = player.scores.all_by_week %>
         <% @weeks.each do |week| %>

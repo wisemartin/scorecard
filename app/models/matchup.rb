@@ -3,13 +3,15 @@ class Matchup < ActiveRecord::Base
   has_one :schedule, :through => :week
   has_one :season, :through => :schedule
   has_many :score_cards, :dependent => :destroy
-  has_many :rounds, :through=>:score_cards
-  has_many :players, :through=>:rounds
+  has_many :rounds, :through => :score_cards
+  has_many :players, :through => :rounds
   belongs_to :home_team, :class_name => 'Team'
   belongs_to :visiting_team, :class_name => 'Team'
   belongs_to :tee_time
-  attr_accessible :week_id, :week, :home_team_id, :visiting_team_id, :home_team_total, :visiting_team_total
+  attr_accessible :week_id, :week, :home_team_id, :visiting_team_id, :home_team_total, :visiting_team_total, :tee_time
   after_create :add_scorecards
+
+  accepts_nested_attributes_for :score_cards
 
   def points(type=:home_team)
     ind = if score_cards.collect { |sc| sc.rounds.collect { |rnd| rnd.points.to_i } }.flatten.sum > 0
@@ -21,19 +23,28 @@ class Matchup < ActiveRecord::Base
   end
 
   def home_team_points
+    #begin
     update_attribute(:home_team_total, points(:home_team)) unless home_team_total.present?
+    #rescue StandardError => e
+    #end
     return home_team_total
   end
 
   def visiting_team_points
+    #begin
     update_attribute(:visiting_team_total, points(:visiting_team)) unless visiting_team_total.present?
+    #rescue StandardError => e
+    #end
     return visiting_team_total
   end
 
   def update_points
-    update_attributes(:home_team_total=>nil,:visiting_team_total=>nil)
-    home_team_points
-    visiting_team_points
+    update_attributes(:home_team_total => nil, :visiting_team_total => nil)
+    begin
+      home_team_points
+      visiting_team_points
+    rescue StandardError => e
+    end
   end
 
 
@@ -43,12 +54,17 @@ class Matchup < ActiveRecord::Base
       scoring_method.points_for(self)
     end
     return scrs if points_collection.compact.blank?
-    scrs[:home_team]=home_team_players.sum do |ply|
-      points_collection.collect { |hsh| hsh[ply.id].to_f }
-    end.sum
-    scrs[:visiting_team]=visiting_team_players.sum do |ply|
-      points_collection.collect { |hsh| hsh[ply.id].to_f }
-    end.sum
+    if type=='individual'
+      scrs[:home_team]=home_team_players.sum do |ply|
+        points_collection.collect { |hsh| hsh[ply.id].to_f }
+      end.sum
+      scrs[:visiting_team]=visiting_team_players.sum do |ply|
+        points_collection.collect { |hsh| hsh[ply.id].to_f }
+      end.sum
+    elsif type=='team'
+      scrs[:home_team]=points_collection.collect { |hsh| hsh[home_team_id].to_f }.sum
+      scrs[:visiting_team]=points_collection.collect { |hsh| hsh[visiting_team_id].to_f }.sum
+    end
     scrs
   end
 
@@ -64,8 +80,12 @@ class Matchup < ActiveRecord::Base
 
   def add_scorecards
     return score_cards if score_cards.present?
-    self.score_cards.create(:team => home_team, :type => 'HeadToHeadScoreCard')
-    self.score_cards.create(:team => visiting_team, :type => 'HeadToHeadScoreCard')
+    begin
+      self.score_cards.create(:team => home_team, :type => 'HeadToHeadScoreCard')
+      self.score_cards.create(:team => visiting_team, :type => 'HeadToHeadScoreCard')
+    rescue StandardError => e
+    end
+
   end
 
   def home_team_display
@@ -77,11 +97,11 @@ class Matchup < ActiveRecord::Base
   end
 
   def home_team_players
-     score_cards.where(:team_id=>home_team_id).first.rounds.collect{|sc| sc.player}
+    score_cards.where(:team_id => home_team_id).first.rounds.collect { |sc| sc.player }
   end
 
   def visiting_team_players
-    score_cards.where(:team_id=>visiting_team_id).first.rounds.collect{|sc| sc.player}
+    score_cards.where(:team_id => visiting_team_id).first.rounds.collect { |sc| sc.player }
   end
 
   def visiting_team_display

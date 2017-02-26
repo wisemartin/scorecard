@@ -20,7 +20,7 @@
     <%= link_to 'Players/Handicaps', players_path, {:class => "btn btn-success #{controller.controller_name=='players' ? 'disabled' : ''}", :type => 'button'} %>
     <%= link_to 'Schedule', schedule_path(Season.find(session[:season_id]).schedule.id), {:class => "btn btn-success #{controller.controller_name=~/schedule|matchup"/i ? 'disabled' : ''}", :type => 'button'} %>
     <%= yield %>
-    <span style="vertical-align: bottom;margin-top:50px;">Copyright 2014-2017 by Martin Wise.</span>
+    <span style="vertical-align: bottom;margin-top:50px;">Copyright &#169;2014-2017 by Martin Wise. All Rights Reserved.</span>
   </div>
 </div>
 <script type='text/javascript'>

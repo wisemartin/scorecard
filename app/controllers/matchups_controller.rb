@@ -30,6 +30,7 @@ class MatchupsController < ApplicationController
     unless @matchup.rounds.collect { |round| round.total_score.to_i }.min > 0 #||true
       redirect_to edit_matchup_path(:id => params[:id])
     else
+      @matchups = @matchup.home_team.matchups.where(:week_id=>@matchup.week_id)
       home_rounds = @matchup.score_cards.where(:team_id => @matchup.home_team_id).first.rounds.sort_by { |round| round.handicap }
       visiting_rounds = @matchup.score_cards.where(:team_id => @matchup.visiting_team_id).first.rounds.sort_by { |round| round.handicap }
       sm = @matchup.season.scoring_methods.where(:type => 'IndividualMatch').first
@@ -101,10 +102,19 @@ class MatchupsController < ApplicationController
   # PUT /matchups/1.json
   def update
     @matchup = Matchup.find(params[:id])
-    @matchup.update_points
+    [@matchup.home_team, @matchup.visiting_team].each do |team|
+      team.matchups.where(:week_id=>@matchup.week_id).each do |matchup|
+        #begin
+          matchup.update_points
+        #rescue StandardError => e
+        #  next
+        #end
+      end
+
+    end
     week = Week.new(date: 1.day.from_now)
     @matchup.players.each do |player|
-      player.player_league_handicaps.find_or_create_by_season_id(@matchup.season.id).update_attribute(:handicap_index, @matchup.season.handicapping_method.differential(player,week))
+      player.player_league_handicaps.find_or_create_by_season_id(@matchup.season.id).update_attribute(:handicap_index, @matchup.season.handicapping_method.differential(player, week))
     end
 
     respond_to do |format|

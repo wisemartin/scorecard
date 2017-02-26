@@ -1,4 +1,5 @@
 <%= link_to('New Golfer', new_player_path, {:class => 'btn btn-danger', :type => 'button', :style => 'float:right;margin-right:75px;'}) unless params[:download] %>
+<%= link_to('Import from last season', new_player_path<<"?copy_players=true", {:class => 'btn btn-warning', :type => 'button', :style => 'float:right;margin-right:5px;'}) if @season.prior_season.present? && session[:user_id].present? -%>
 
 <div style="height:65px;">
   <h4><%= @season.name %> Players</h4>
@@ -20,7 +21,7 @@
 
   <% unless @season.limit_subs_to_roster %>
       <h4>Subs List</h4>
-      <% @players = @subs.select { |player| (player.rounds.for_season(@season)).present? } %>
+      <% @players = @subs %>
       <%= render 'players_list' %>
   <% end %>
 

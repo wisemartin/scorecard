@@ -15,15 +15,11 @@
           <td><%= hc.text_field :max_handicap, {:style => 'width:60px;'} %></td>
 
 
-          <!-- primary handicap definition -->
     <% end %>
     </tr>
     </table>
 <!-- how to establish handicap -->
-<!--exclude_extremes-->
-<!--use_ratings-->
 <!--use_stats_for_hole_handicap-->
-<!--allow_positive_handicap-->
 
 <!--ignore_unopposed_rounds-->
 <%= fields_for @season.handicapping_method do |hc| %>
@@ -61,9 +57,6 @@
     <!-- primary handicap definition -->
 <% end %>
 
-<!--limit_to_max_hole_score-->
-<!--max_hole_score_type-->
-<!--max_hole_score_amount-->
 
 
 

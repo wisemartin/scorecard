@@ -1,15 +1,5 @@
 <tfoot>
-<tr>
-  <td colspan="11" style="background-color: white" height="0px;"></td>
-</tr>
-<tr style='height:1px;background-color: #b5bbc7;'>
-  <th style='width:17.5%;'>Par
-  </th>
-  <% holes.each do |hole| %>
-      <th style='width:7%;'><%= hole.par %></th>
-  <% end %>
-  <th style='width:19.5%'></th>
-</tr>
+<%= render partial: 'hole_number_line', :locals=>{holes: holes} %>
 
 <tr>
   <% style="background-color:rgb(111, 106, 106);color:white;" %>

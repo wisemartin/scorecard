@@ -12,8 +12,10 @@ class Round < ActiveRecord::Base
   attr_accessible :date, :player_id, :score_card_id, :player, :score_card, :tee_box, :tee_box_id, :type
   attr_accessor :hin_calc
 
-  scope :for_season, lambda { |season| {:select => "rounds.*", :joins => ["join score_cards scsc on scsc.id = rounds.score_card_id join matchups tsc on tsc.id = scsc.matchup_id join weeks wsc on wsc.id = tsc.week_id join schedules dsc on dsc.id = wsc.schedule_id and dsc.season_id = #{season.id}"]} }
+  accepts_nested_attributes_for :scores
 
+  scope :for_season, lambda { |season| {:select => "rounds.*", :joins => ["join score_cards scsc on scsc.id = rounds.score_card_id join matchups tsc on tsc.id = scsc.matchup_id join weeks wsc on wsc.id = tsc.week_id join schedules dsc on dsc.id = wsc.schedule_id and dsc.season_id = #{season.id}"]} }
+  scope :for_week, lambda { |week| {:select => "rounds.*", :joins => ["join score_cards scsc on scsc.id = rounds.score_card_id join matchups tsc on tsc.id = scsc.matchup_id and tsc.week_id = #{week.id}"]} }
 
   def hcp_index
     hcp_index = nil
@@ -28,7 +30,8 @@ class Round < ActiveRecord::Base
     hc = self.handicap if self.handicap.present?
     set_handicap unless hc
     hc = handicap*(course_rating.slope_rating/113.0) if handicapping_method.use_ratings?
-    hc.round
+    return hc.round if hc
+    0
   end
 
   def starting_index

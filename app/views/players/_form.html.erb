@@ -1,13 +1,5 @@
 <%= form_for(@player, :class => 'form-horizontal') do |f| %>
-    <script>
-        if (obj = document.getElementById("edit_player_<%= params[:id] %>")) {
-            obj.className = 'form-horizontal';
-        }
-        else {
-            document.getElementById('new_player').className = 'form-horizontal';
-        }
 
-    </script>
     <% if @player.errors.any? %>
         <div id="error_explanation">
           <h2><%= pluralize(@player.errors.count, "error") %> prohibited this player from being saved:</h2>
@@ -20,15 +12,25 @@
         </div>
     <% end %>
     <div class="control-group">
-      <% [:first_name, :last_name, :email].each do |field_name| %>
-          <%= f.label field_name, :class => 'control-label' %>
+      <% [:first_name, :last_name, :email, :phone, :home_address, :city, :state_or_province, :gender].each do |field_name| %>
+          <%= f.label field_name, :class => 'control-label' %><span style="font-style:italic"><%= [:first_name,:last_name].include?(field_name)? '(required)' : ''%></span>
+          <% Player.columns do |column| %>
+                    <%= column.name %>
+                    <div class='controls'>
+                      <%#= f.text_field field_name %>
+                    </div>
+
+                <% end %>
+
           <div class='controls'>
             <%= f.text_field field_name %>
           </div>
 
       <% end %>
-      <%= f.label :skins_paid, :class => 'control-label' %>
-      <div class='controls'><%= f.check_box :skins_paid %></div>
+      <% if @season.skins_paid_by_season? %>
+          <%= label :players_season, :skins_paid, :class => 'control-label' %>
+          <div class='controls'><%= check_box :players_seasons, :skins_paid %></div>
+      <% end %>
     </div>
 
     <div class="actions">

@@ -7,13 +7,14 @@ class OrganizationsController < ApplicationController
 
   def set_session
     mu = Organization.find(params[:id]) if params[:id]
+    [:season_id, :league_id].each{|val| session.delete(val)}
     if mu
       session[:organization_id] = mu.id
     end
   end
 
   def index
-    reset_session
+
     @organizations = Organization.all(:include => :state, :order=>'name')
 
     respond_to do |format|

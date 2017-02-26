@@ -1,13 +1,15 @@
-<%= link_to 'New League', new_league_path<<"?organization_id=#{session[:organization_id]}", {:class => 'btn btn-primary', :type => 'button'} %>
+<%= link_to 'New League', new_league_path<<"?organization_id=#{session[:organization_id]}", {:class => 'btn btn-danger', :style=>'float:right;margin-right:75px', :type => 'button'} %>
 <div style="margin-top:20px;">
-  <h1>Leagues</h1>
+  <h4><%= @leagues.first.organization.name %> Leagues</h4>
   <table class='table table-bordered'>
     <tr>
       <th>Name</th>
     </tr>
     <% @leagues.each_with_index do |league,i| %>
         <tr class='<%= i.odd? ? 'warning' : 'success' %>'>
-          <td><%= link_to league.name, league_path(league.id) %></td>
+          <td><%= link_to league.name, league_path(league.id) %>
+            <%= link_to('edit', edit_league_path(league), :style=>'float:right;margin-right:20px;') if session[:user_id] -%>
+          </td>
         </tr>
 
     <% end %>

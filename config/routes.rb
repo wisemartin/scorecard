@@ -29,9 +29,9 @@ Scorecard::Application.routes.draw do
   # Sample resource route with sub-resources:
      resources :scores, :games, :teams, :players, :seasons, :leagues, :organizations, :schedules, :matchups, :score_cards, :weeks, :divisions, :rounds
 
-     #resources :comments, :sales
-  #     resource :seller
-  #   end
+     # resources :comments, :sales
+     #   resource :seller
+     # end
 
   # Sample resource route with more complex sub-resources
   #   resources :products do

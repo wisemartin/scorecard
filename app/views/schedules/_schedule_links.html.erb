@@ -1,0 +1,3 @@
+<% @schedule.weeks.order(:date).each do |week| %>
+    <%= link_to week.date.strftime("%m-%d"), schedules_path<<"/#{week.schedule_id}?week_id=#{week.id}", {:class => (week.matchups.present? ? "btn #{this_week==week ? '' : 'btn-mini'} btn-primary #{this_week==week ? ' disabled' : ''}" : "btn #{this_week==week ? '' : 'btn-mini'}  btn-danger disabled"), :type => 'btn'} %>
+<% end %>

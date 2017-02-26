@@ -1,4 +1,4 @@
-source 'https://rubygems.org'
+source 'http://rubygems.org'
 
 gem 'rails', '3.2.8'
 
@@ -11,8 +11,10 @@ gem 'capistrano'
 gem 'unicorn', :platforms => :ruby
 gem 'execjs'
 gem 'twitter-bootstrap-rails', :git => "git://github.com/seyhunak/twitter-bootstrap-rails.git", :branch => "static"
+gem 'bootstrap-select-rails'
 gem 'bootstrap-datepicker-rails', '>= 0.6.21'
 gem 'nested_form_fields'
+gem "combined_time_select", "~> 1.0.1"
 
 # Gems used only for assets and not required
 # in production environments by default.
@@ -27,6 +29,7 @@ group :assets do
 end
 
 gem 'jquery-rails'
+gem 'jquery-ui-rails'
 gem 'rubin'
 gem 'bcrypt-ruby', '~> 3.0.0'
 

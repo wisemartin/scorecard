@@ -3,14 +3,20 @@ class LeaguesController < ApplicationController
   # GET /leagues.json
 
   before_filter :require_auth, :only => [:new, :edit, :create]
-  before_filter :set_session, :except=>[:new,:create]
+  before_filter :set_session, :except => [:new, :create]
 
   def set_session
-    mu = League.find(params[:id]) if params[:id]
-    mu ||= League.find(session[:league_id])
-    if mu
-      session[:league_id] = mu.id
-      session[:organization_id] = mu.organization_id
+    unless params[:id]||session[:organization_id]||session[:league_id]
+      respond_to do |format|
+        format.html {redirect_to organizations_path, notice: 'You have to select an organization first.'}
+      end
+    else
+      mu = League.find(params[:id]) if params[:id]
+      mu ||= League.find(session[:league_id])
+      if mu
+        session[:league_id] = mu.id
+        session[:organization_id] = mu.organization_id
+      end
     end
   end
 
@@ -57,6 +63,7 @@ class LeaguesController < ApplicationController
   # POST /leagues.json
   def create
     @league = League.new(params[:league])
+    @league.organization_id=session[:organization_id]
 
     respond_to do |format|
       if @league.save

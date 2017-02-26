@@ -33,31 +33,33 @@ class SchedulesController < ApplicationController
     @week = Week.find(params[:week_id]) if params[:week_id]
     @week ||= @schedule.weeks.active_week.first
     @week ||= @schedule.weeks.order(:date).first
-    @gross_skins = @week.gross_skins.collect do |sc|
-      [sc.player.full_name, sc.hole.number, sc.score,
-       case sc.hole.par - sc.score
-         when 1
-           'Birdie'
-         when 2
-           'Eagle'
-         else
-           'Par'
-       end
-      ]
-    end if @schedule.season.gross_skins?
+    if @week.matchups.present?
+      @gross_skins = @week.gross_skins.collect do |sc|
+        [sc.player.full_name, sc.hole.number, sc.score,
+         case sc.hole.par - sc.score
+           when 1
+             'Birdie'
+           when 2
+             'Eagle'
+           else
+             'Par'
+         end
+        ]
+      end if @schedule.season.gross_skins? && @week.rounds.present?
 
-    @net_skins = @week.net_skins.collect do |sc|
-      [sc.player.full_name, sc.hole.number, sc.net_score,
-       case sc.hole.par - sc.net_score
-         when 1
-           'Birdie'
-         when 2
-           'Eagle'
-         else
-           'Albatross'
-       end
-      ]
-    end if @schedule.season.net_skins?
+      @net_skins = @week.net_skins.collect do |sc|
+        [sc.player.full_name, sc.hole.number, sc.net_score,
+         case sc.hole.par - sc.net_score
+           when 1
+             'Birdie'
+           when 2
+             'Eagle'
+           else
+             'Albatross'
+         end
+        ]
+      end if @schedule.season.net_skins?
+    end
 
     @net_scores = @week.rounds.where('gross_score > 0').order('rounds.gross_score-round(rounds.handicap), rounds.gross_score desc').limit(3).collect do |round|
       [round.player.full_name, round.gross_score, round.net_score]

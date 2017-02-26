@@ -1,3 +1,4 @@
+<%= link_to('New Golfer', new_player_path, {:class => 'btn btn-danger', :type => 'button', :style => 'float:right;margin-right:75px;'}) unless params[:download] %>
 <h1>New team</h1>
 
 <%= render 'form' %>

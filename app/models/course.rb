@@ -1,5 +1,6 @@
 class Course < ActiveRecord::Base
-  has_many :tee_boxes
+  has_many :tee_boxes, :dependent => :destroy
+  has_many :holes, :through=>:tee_boxes
   has_many :score_cards
   has_many :seasons
   attr_accessible :name, :city, :state_or_province, :country, :private, :user_id

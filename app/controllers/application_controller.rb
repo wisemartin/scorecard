@@ -27,7 +27,7 @@ class ApplicationController < ActionController::Base
     if session[:user_id].blank?
       if user = my_authenticate
         session[:user_id] = user.id
-        session[:expires_in]=30.minutes.from_now
+        session[:expires_in]=7.days.from_now
       else
         request_http_basic_authentication
         return
@@ -36,8 +36,6 @@ class ApplicationController < ActionController::Base
       unless user = User.find(session[:user_id])
         session[:user_id] = nil
         return
-      else
-        reset_session
       end
     end
     session[:user_id]

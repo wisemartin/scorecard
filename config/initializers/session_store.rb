@@ -2,7 +2,7 @@
 
 Scorecard::Application.config.session_store :cookie_store, {
     key: '_scorecard_session',
-    expire_after: 30.minutes
+    expire_after: 7.days
 }
 
 # Use the database for sessions instead of the cookie-based default,

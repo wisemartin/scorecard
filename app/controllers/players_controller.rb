@@ -5,7 +5,7 @@ class PlayersController < ApplicationController
 
   def index
     @season = Season.find(session[:season_id])
-    @players = @season.divisions.collect{|d| d.teams}.flatten.collect{|t| t.players}.flatten
+    @players = @season.divisions.collect { |d| d.teams }.flatten.collect { |t| t.players }.flatten
     @subs = @season.players - @players
     @weeks = @season.schedule.weeks.order(:date)
     if params[:download]
@@ -43,12 +43,23 @@ class PlayersController < ApplicationController
   # GET /players/new
   # GET /players/new.json
   def new
-    @player = Player.new
+    if params[:copy_players].present?
+      @season = Season.find(session[:season_id])
+      @season.copy_players=true
+      @season.add_players
+      respond_to do |format|
+        format.html {redirect_to players_path}
+      end
+    else
+      @player = Player.new
+      @season = Season.find(session[:season_id])
 
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @player }
+      respond_to do |format|
+        format.html # new.html.erb
+        format.json { render json: @player }
+      end
     end
+
   end
 
   # GET /players/1/edit
@@ -59,12 +70,14 @@ class PlayersController < ApplicationController
   # POST /players
   # POST /players.json
   def create
-    @player = Player.new(params[:player])
-    @player.short_name = (@player.last_name[0..3] + @player.first_name[0..3])[0..6]
+    good_vals = params[:player].select { |key, value| value.present? }
+    @player = Player.new(good_vals)
+
 
     respond_to do |format|
       if @player.save
-        format.html { redirect_to @player, notice: 'Player was successfully created.' }
+        PlayersSeason.create(season_id: session[:season_id], player_id: @player.id)
+        format.html { redirect_to players_path, notice: 'Player was successfully created.' }
         format.json { render json: @player, status: :created, location: @player }
       else
         format.html { render action: "new" }

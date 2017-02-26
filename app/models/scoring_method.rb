@@ -77,17 +77,19 @@ end
 class TeamMedal < ScoringMethod
   def points_for(matchup)
     pts={}
-    home_team = matchup.score_cards.where(:team_id => matchup.home_team_id).first.rounds.sort_by { |rnd| rnd.handicap }
-    visiting_team = matchup.score_cards.where(:team_id => matchup.visiting_team_id).first.rounds.sort_by { |rnd| rnd.handicap }
-    home_net = home_team.sum { |round| round.total_score-round.course_handicap }
-    visiting_net = visiting_team.sum { |round| round.total_score-round.course_handicap }
+    home_team = matchup.score_cards.where(:team_id => matchup.home_team_id).first.team
+    visiting_team = matchup.score_cards.where(:team_id => matchup.visiting_team_id).first.team
+    home_rounds = home_team.score_cards.for_week(matchup.week).collect{|sc| sc.rounds}.flatten
+    visiting_rounds = visiting_team.score_cards.for_week(matchup.week).collect{|sc| sc.rounds}.flatten
+    home_net = home_rounds.sum { |round| round.gross_score-round.course_handicap }
+    visiting_net = visiting_rounds.sum { |round| round.gross_score-round.course_handicap }
     case home_net <=> visiting_net
       when -1
-        pts[home_team.first.player_id]=self.points_per_match
+        pts[home_team.id]=(self.points_per_match.to_f/home_team.score_cards.for_week(matchup.week).count)
       when 0
-        pts[home_team.first.player_id]=pts[visiting_team.first.player_id]=self.points_per_match.to_f/2.0
+        pts[home_team.id]=pts[visiting_team.id]=(self.points_per_match.to_f/home_team.score_cards.for_week(matchup.week).count.to_f)/2.0
       else
-        pts[visiting_team.first.player_id]= self.points_per_match
+        pts[visiting_team.id]= (self.points_per_match.to_f/home_team.score_cards.for_week(matchup.week).count.to_f)
     end
     pts
   end
@@ -103,5 +105,33 @@ class PairMedal < ScoringMethod
 end
 
 class PairMatch < ScoringMethod
+
+end
+
+class IndividualQuota < ScoringMethod
+# Eagle	 	8 Points
+# Birdie	 	4 Points
+# Par	 	2 Points
+# Bogey	 	1 Points
+
+
+
+end
+class TeamQuota < ScoringMethod
+
+end
+
+class IndividualStableford < ScoringMethod
+# Double Eagle  8 Points
+# Eagle	 	5 Points
+# Birdie	 	2 Points
+# Par	 	0 Points
+# Bogey	 	-1 Points
+# Double Bogey	 	-2 Points
+
+
+end
+
+class TeamStableford < ScoringMethod
 
 end

@@ -4,20 +4,38 @@ class Division < ActiveRecord::Base
   has_many :teams
   attr_accessible :name, :season_id, :season
 
-  def round_robin_schedule(weeks=nil, week=nil)
-    weeks ||= self.teams.count-1
-    rrteams = Rubin.new(self.teams.collect { |tm| tm.id })
-    round_start, i = 0
+  def round_robin_schedule(weeks=nil, week=nil, across_divisions=false, extend_schedule=true, random_single_week=false, overwrite=false)
+    weeks ||= season.schedule.weeks.order(:date)
+    weeks = weeks.where("date >= ?", week.date) if week
+    weeks = weeks.select{|wk| wk.matchups.blank?} unless overwrite
+    these_teams = season.teams if across_divisions
+    these_teams ||= teams
+    rrteams = Rubin.new(these_teams.collect { |tm| tm.id })
+    round_start = weeks.index(week).to_i
+    random_single_week = weeks[rand(these_teams.size-1)] if random_single_week
+    this_round = this_week = nil
     rrteams.each_matchup do |home, away, round|
-      this_round = round+round_start
+      if this_round.nil? || this_round != round+round_start
+        this_round = round+round_start
+        this_week = weeks[this_round-1]
+        this_week ||= season.schedule.weeks.create(:date => weeks.last.date+7.days) if extend_schedule
+        this_week.matchups.destroy_all
+      end
       (self.season.number_playing_each_match/2).times do |i|
-        Matchup.create(:week => season.weeks[this_round-1], :home_team_id => home, :visiting_team_id => away)
+        #destroy week if overwrite, skip if not.
+        if random_single_week && random_single_week!=this_week
+          next
+        elsif random_single_week
+          this_week = week
+        end
+        break unless this_week
+        Matchup.create(:week => this_week, :home_team_id => home, :visiting_team_id => away)
       end
 
     end
   end
 
-  def add_position_round(week=nil, championship=nil)
+  def add_position_round(week=nil, championship=false)
     week ||=Game.first(:order => "week desc").week+1
     d1_teams = teams.sort_by { |team| team.team_total_score }
     matchups = []

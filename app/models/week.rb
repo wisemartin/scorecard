@@ -6,8 +6,10 @@ class Week < ActiveRecord::Base
   has_many :rounds, :through => :score_cards
   has_many :scores, :through => :rounds
   has_many :players, :through => :matchups
+  has_many :players_weeks_skins
   belongs_to :course
-  attr_accessible :schedule_id, :date, :course_id
+  attr_accessible :schedule_id, :date, :course_id, :matchups_attributes
+  accepts_nested_attributes_for :matchups
 
   scope :active_week, {
       :select => 'weeks.*',
@@ -34,7 +36,7 @@ class Week < ActiveRecord::Base
   def net_skins
     holes = rounds.first.holes_for_round
     holes.collect do |hole|
-      scores.where('rounds.player_id' => [self.players.in_skins(self).collect { |p| p.id }]).group([:net_score, :hole_id]).select('hole_id, scores.id, scores.round_id, scores.net_score, count(scores.id) as number').having('number = 1').where(["hole_id=#{hole.id} and scores.net_score <= #{hole.par}"]).order(:net_score).first
+      scores.where('rounds.player_id' => [self.players.in_skins(self).collect { |p| p.id }]).group([:net_score, :hole_id]).select('hole_id, scores.id, scores.round_id, scores.net_score, count(scores.id) as number').having('number = 1').where(["hole_id=#{hole.id} and scores.net_score < #{hole.par}"]).order(:net_score).first
     end.compact
 
   end

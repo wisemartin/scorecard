@@ -1,4 +1,5 @@
 <thead style="border-bottom: black 3px solid;">
+
 <% tee_boxes.sort_by { |tb| tb.holes.first.length }.reverse.each do |tee_box| %>
     <% style="background-color:#{tee_box.color};color:#{%w(White Gold white gold).include?(tee_box.color) ? 'black' : 'white'};" %>
     <tr>
@@ -11,8 +12,7 @@
     </tr>
 
 <% end %>
-<tr>
-  <td colspan="11" style="background-color: white" height="0px;"></td>
-</tr>
+<%= render partial: 'hole_number_line', locals: {holes: holes} %>
+<%= render partial: 'tr_spacer' %>
 
 </thead>

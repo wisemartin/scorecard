@@ -1,19 +1,80 @@
+<script>
+    $(function () {
+        $(".draggable").draggable();
+    });
+</script>
 <%= form_for(@week) do |f| %>
-  <% if @week.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(@week.errors.count, "error") %> prohibited this week from being saved:</h2>
+    <% if @week.errors.any? %>
+        <div id="error_explanation">
+          <h2><%= pluralize(@week.errors.count, "error") %> prohibited this week from being saved:</h2>
 
-      <ul>
-      <% @week.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
+          <ul>
+            <% @week.errors.full_messages.each do |msg| %>
+                <li><%= msg %></li>
+            <% end %>
+          </ul>
+        </div>
+    <% end %>
+    <h4><%= @schedule.season.name %> Schedule - <%= @week.course.name %></h4>
+    <h5><%= @week.date.strftime("%A, %b %d, %Y") %>
+
+      <% if @week.matchups.first.present? %>
+
+          - <%= @week.matchups.first.score_cards.first.rounds.first.type.to_s.gsub("Round", '').underscore.humanize.titleize %>
       <% end %>
-      </ul>
-    </div>
-  <% end %>
-  <%= button_to_function 'Rain-out','/weeks/rainout' %>
-   <p></p>
+    </h5>
 
-  <div class="actions">
-    <%= f.submit %>
-  </div>
+    <%= render partial: 'schedules/schedule_links', locals: {this_week: @week} %>
+
+    <% if @week.matchups.present? %>
+        <h4>Insert Gap</h4>
+        If you would like to insert a gap, either due to a rainout, or due to a new type of matchup (position round, fun night, or just a holiday) please
+        select the "Skip this week" option.  After saving, you'll be able to modify this week as necessary.<br/>
+        <br/>
+        <% if @week.season.course.holes.count > 9 && @week.season.rotate_nines? %>
+            <%= radio_button_tag 'schedule_week', 'switch', nil, :onclick => "$('div#teebox_options').show();$('div#rainout_options').hide();" %> Swap front or back nine for this round?
+            <br/>
+            <div id="teebox_options" style="display: none;">
+              <fieldset style="border: solid 1px darkblue;padding:5px;margin:10px;">
+                <%= check_box_tag 'switch_remaining_schedule' %> Alter the remaining schedule?
+              </fieldset>
+            </div>
+        <% end %>
+        <%= radio_button_tag 'schedule_week','rain_out', nil, :onclick => "$('div#rainout_options').show();$('div#teebox_options').hide();$('div#manual_matchups').hide();" %> Skip this week?
+        <br/>
+        <div id="rainout_options" style="display: none;">
+          <fieldset style="border: solid 1px darkblue;padding:5px;margin:10px;">
+            <% if @week.scores.present? %>
+                <%= check_box_tag 'retain_current_scores' %>Rain out, but retain current scores present for this
+                week?<br/>
+            <% end %>
+            <%= radio_button_tag 'rainout_option', 'slide' %> Slide the entire schedule?<br/>
+            <%= radio_button_tag 'rainout_option', 'move' %> Move this week to the end of currently scheduled play?<br/>
+            <%= radio_button_tag 'rainout_option', 'discard' %> Discard this week entirely? <br/>
+          </fieldset>
+        </div><br/>
+    <% else %>
+        <%= render partial: 'automated_scheduling' %>
+        <h4>Practice/Handicap Setting Round</h4>
+        <fieldset style="border: solid 1px darkblue;padding:5px;margin:10px;">
+          <%= radio_button_tag 'schedule_week', 'practice_round', nil, :onclick => "$('div#manual_matchups').hide();$('div#round_robin_all_divisions').hide();$('div#championship_option').hide();" %>
+          Make this week a practice round or handicap setting round?<br/>
+
+        </fieldset>
+
+    <% end %>
+
+    <h4>Manual scheduling:</h4>
+    <fieldset style="border: solid 1px darkblue;padding:5px;margin:10px;">
+      <%= radio_button_tag 'schedule_week', 'manual_update', nil, :onclick => "$('div#manual_matchups').show();$('div#round_robin_all_divisions').hide();$('div#championship_option').hide();" %>
+      Manually create matchups for this week?<br/>
+
+    </fieldset>
+    <div id="manual_matchups" style="<%= @week.matchups.present? ? '' : 'display:none;' -%>">
+      <%= render partial: 'matchups', locals: {f: f} %>
+    </div>
+
+    <div class="actions">
+      <%= f.submit %>
+    </div>
 <% end %>

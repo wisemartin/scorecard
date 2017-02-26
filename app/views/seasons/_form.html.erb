@@ -1,5 +1,5 @@
 <script>
-    $( "#season_start_date" ).datepicker( "option", "dateFormat", "yy-mm-dd" );
+    $("#season_start_date").datepicker("option", "dateFormat", "yy-mm-dd");
 </script>
 <%= form_for(@season) do |f| %>
     <% if @season.errors.any? %>
@@ -16,60 +16,97 @@
 
     <h2>Name</h2>
     <%= f.text_field :name, :style => "width:400px;" %>
-    <h2>Schedule</h2>
-    Starting on:<br/><%= f.text_field :start_date, {:class => 'datepicker', "data-provide" => 'datepicker', :value=>@season.start_date.strftime("%m/%d/%Y")} %>
-    <br/>
-    Every:<br/>
-    <table>
-      <tr>
-
-        <% Date::ABBR_DAYNAMES.each_with_index do |wday, i| %>
-            <th><%= wday %>
-              <br/><%= check_box_tag wday, i, false %>
-            </th>
-        <% end %>
-      </tr>
-    </table>
-
-    <%= f.hidden_field(:league_id) %>
-    Ending:<br/>
-    <%= f.text_field :end_date, {:class => 'datepicker', "data-provide" => 'datepicker', :value=>@season.end_date.strftime("%m/%d/%Y")} %>
-    <br/>
-    <%#= f.text_field :number_weeks, :style=>"width:100px;"%>
-
 
     <h2>Course</h2>
-    <%= collection_select(:week, :course_id, Course.all, :id, :name, :prompt => true) %><p/>
-    -button to new course
+    <fieldset>
+      <%= f.collection_select(:course_id, Course.all, :id, :name, {:prompt => true}, :data => { :remote => true, :url => url_for(:controller => :seasons,
+                                               :action => :new, :course_id=>true) }) %> <%= link_to 'New Course', '#', {:title => 'This will take a while.', :class => 'btn btn-danger', :type => 'button', :style => 'float:right;margin-right:75px;'} %>
+    </fieldset>
+    <div id="teeboxchoice">
+      <%= render partial: 'tee_box_choice' %>
+    </div>
+    <h2>Rounds</h2><p/>
+    <%= f.check_box :eighteen_holes %>   Each match is 18 holes (rather than 9 hole matches)<br/>
+    <%= f.check_box :rotate_nines %>   Rotate rounds between front and back if course is 18 holes<br/>
+
+
+
+    <h2>Schedule</h2>
+    <fieldset style="border:solid 1px darkblue;padding:20px;">
+      Starting on:
+      <br/><%= f.text_field :start_date, {:class => 'datepicker', "data-provide" => 'datepicker', :value => @season.start_date.strftime("%m/%d/%Y")} %>
+      <br/>
+      Ending:<br/>
+      <%= f.text_field :end_date, {:class => 'datepicker', "data-provide" => 'datepicker', :value => @season.end_date.strftime("%m/%d/%Y")} %>
+      <br/>
+      Every:<br/>
+      <table>
+        <tr>
+
+          <% Date::ABBR_DAYNAMES.each_with_index do |wday, i| %>
+              <th><%= wday %>
+                <br/><%= check_box_tag "wday[#{i}]", wday, false %>
+              </th>
+          <% end %>
+        </tr>
+      </table>
+
+      <%= f.hidden_field(:league_id) %>
+      <%#= f.text_field :number_weeks, :style=>"width:100px;"%>
+      <br/>
+      <%= f.check_box :scramble_tee_boxes %> Scramble starting holes? <br/>
+      <br/>
+      <%= f.label :tee_time_start, 'Tee times start at: ' %>
+      <%= f.time_select :tee_time_start, :default => Time.now().change(hour: 16, minute: 00), :combined => true,
+                        :minute_interval => 30,
+                        :time_separator => "",
+                        :labels => false,
+                        :ampm => true %>
+
+      <br/>
+      <br/>
+      <%= f.label :tee_time_interval, 'Interval between tee times' %>
+      <%= f.number_field :tee_time_interval, :style => 'width:30px;' %> minutes.<br/>
+    </fieldset>
+
 
     <h2>Handicapping</h2>
-    <%#= @season.handicapping_method.attributes.inspect %>
-    <p/>
-    <%= render :partial => 'handicapping_method' %>
-
+    <fieldset style="border:solid 1px darkblue;padding:20px;">
+      <%#= @season.handicapping_method.attributes.inspect %>
+      <p/>
+      <%= render :partial => 'handicapping_method', locals: {f: f} %>
+    </fieldset>
     <h2>Scoring</h2>
+    <fieldset style="border:solid 1px darkblue;padding:20px;">
+      <%= f.nested_fields_for :scoring_methods do |sm| %>
+          <%= sm.remove_nested_fields_link %>
+          <%= sm.text_field :type, {:disabled => true, :style => "width:110px;"} %>
+          <%= sm.hidden_field :type %>
+          Points per matchup: <%= sm.text_field :points_per_match, :style => "width:40px;" %>
+          <br/></label>
 
-    <%= f.nested_fields_for :scoring_methods do |sm| %>
-        <%= sm.remove_nested_fields_link %>
-        <%= sm.text_field :type, {:disabled => true, :style => "width:110px;"} %>
-        <%= sm.hidden_field :type %>
-        Points per matchup: <%= sm.text_field :points_per_match, :style => "width:40px;" %><br/></label>
+
+      <% end %>
+
+      <h4>Skins</h4>
+      <%= f.check_box :gross_skins %>   Skins for raw scores?<br/>
+      <%= f.check_box :net_skins %>   Skins for net scores?<br/>
+      <%= f.check_box :skins_paid_by_season %>   Collect and track skins for the season? (unchecked means weekly
+      tracking)
+    </fieldset>
+    <br/>
 
 
-    <% end %>
     <%# f.add_nested_fields_link(:scoring_methods)%>
     <p/>
-    <h2>Rounds</h2><p/>
-    9 hole<p/>
-    - rotate 9s? if 9 hole and more than 9 holes on course.
-    18 hole<p/>
+
 
 
     <h2>Teams</h2>
     <%= f.label :roster_size %>
-    <%= f.text_field :roster_size, :style=>"width:60px;" %><br/>
+    <%= f.text_field :roster_size, :style => "width:60px;" %><br/>
     <%= f.label :roster_size, 'Number playing each match' %>
-    <%= f.text_field :number_playing_each_match, :style=>"width:60px;" %><br/>
+    <%= f.text_field :number_playing_each_match, :style => "width:60px;" %><br/>
     <%= f.check_box :limit_subs_to_roster %> Limit sublist to team roster.<br/>
 
     <h2>Divisions</h2>
@@ -78,7 +115,7 @@
           <%= render :partial => 'divisions', :locals => {:sd => sd} %>
       <% end %>
     </div>
-    <%= f.add_nested_fields_link(:divisions, "Add Division" ,data:{ insert_into: 'divisions'}) %>
+    <%= f.add_nested_fields_link(:divisions, "Add Division", data: {insert_into: 'divisions'}) %>
 
 
     <div class="actions">

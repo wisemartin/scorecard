@@ -1,6 +1,9 @@
 class Team < ActiveRecord::Base
   belongs_to :division
   has_many :score_cards
+  has_many :rounds, :through => :score_cards
+  has_many :matchups, :through=>:score_cards
+  has_many :weeks, :through=>:matchups
   has_and_belongs_to_many :players
   has_and_belongs_to_many :partners, :join_table => 'players_teams'
   has_one :season, :through=>:division
@@ -28,7 +31,7 @@ class Team < ActiveRecord::Base
   end
 
   def team_id
-    season.teams.order(:id).index(self)+1
+    season.teams.order(:id).index(self)+1 if season
   end
 
 
